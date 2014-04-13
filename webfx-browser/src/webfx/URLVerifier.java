@@ -39,6 +39,8 @@
  */
 package webfx;
 
+import com.webfx.JavaRestartURLHandler;
+
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -55,8 +57,13 @@ public class URLVerifier {
     private URL basePath;
     private String pageName;
     private boolean fxml;
+    private boolean javaRestart;
 
     public URLVerifier(String location) throws MalformedURLException {
+        if (location.startsWith(JavaRestartURLHandler.JAVA_PROTOCOL)) {
+            javaRestart = true;
+            location = JavaRestartURLHandler.convertToHttp(location);
+        }
         try {
             this.location = new URL(location);
         } catch (MalformedURLException e) {
@@ -125,4 +132,9 @@ public class URLVerifier {
     public boolean isFxml() {
         return fxml;
     }
+
+    public boolean isJavaRestart() {
+        return javaRestart;
+    }
+
 }

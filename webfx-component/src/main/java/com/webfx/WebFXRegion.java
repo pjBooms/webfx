@@ -145,6 +145,12 @@ public final class WebFXRegion extends AnchorPane {
         }
 
         @Override
+        public void launch(String location) {
+            JavaRestartURLHandler.launch(location,
+                    defaultView.getPageContext().getBasePath().toExternalForm());
+        }
+
+        @Override
         public void reload() {
             WebFXRegion.this.load();
         }

@@ -39,10 +39,10 @@
  */
 package webfx;
 
+import com.webfx.JavaRestartURLHandler;
 import com.webfx.NavigationContext;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.beans.property.ObjectProperty;
@@ -172,6 +172,15 @@ public class HTMLTab implements BrowserTab {
             @Override
             public void goTo(String location) {
                 webEngine.load(location);
+            }
+
+            @Override
+            public void launch(String location) {
+                try {
+                    JavaRestartURLHandler.launch(location,
+                            new URLVerifier(webEngine.getLocation()).getBasePath().toExternalForm());
+                } catch (MalformedURLException e) {
+                }
             }
 
         };

@@ -46,6 +46,8 @@ import java.util.Locale;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.webfx.JavaRestartURLHandler;
 import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -145,6 +147,11 @@ public class BrowserFXController implements TabManager {
         }
 
         final URL url = urlVerifier.getLocation();
+
+        if (urlVerifier.isJavaRestart()) {
+            JavaRestartURLHandler.launch(url);
+            return;
+        }
         final boolean isFxml = urlVerifier.isFxml();
 
         Platform.runLater(() -> {
