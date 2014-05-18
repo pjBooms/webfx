@@ -17,7 +17,7 @@
 */
 package webfx;
 
-import com.excelsior.javarestart.JavaRestartLauncher;
+import javarestart.JavaRestartLauncher;
 
 import java.net.URL;
 
