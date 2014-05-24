@@ -39,6 +39,15 @@
  */
 package webfx.browser;
 
+import javafx.application.Platform;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
+import javafx.fxml.FXML;
+import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import webfx.JavaRestartURLHandler;
+
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -47,20 +56,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import webfx.JavaRestartURLHandler;
-import javafx.application.Platform;
-import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableList;
-import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.SingleSelectionModel;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
-import javafx.scene.control.TextField;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-
 /**
  *
  * @author Bruno Borges at oracle.com
@@ -68,6 +63,7 @@ import javafx.scene.image.ImageView;
 public class BrowserFXController implements TabManager {
 
     private static final Logger LOGGER = Logger.getLogger(BrowserFXController.class.getName());
+    public static final String HOME_PAGE = "javarestart.jelasticloud.com";
     /**
      * Components
      */
@@ -85,6 +81,8 @@ public class BrowserFXController implements TabManager {
     private Button backButton;
     @FXML
     private Button forwardButton;
+    @FXML
+    private Button homeButton;
     /**
      * Internal
      */
@@ -95,6 +93,10 @@ public class BrowserFXController implements TabManager {
     public void exit() {
         LOGGER.info("Exiting...");
         System.exit(0);
+    }
+
+    public void home() {
+        openPage(HOME_PAGE);
     }
 
     public void newTab() {
@@ -218,6 +220,7 @@ public class BrowserFXController implements TabManager {
         setButtonIcon(backButton, "left", size);
         setButtonIcon(forwardButton, "right", size);
         setButtonIcon(reloadButton, "clock", size);
+        setButtonIcon(homeButton, "home", size);
     }
 
     private void setButtonIcon(Button button, String icon, int size) {
