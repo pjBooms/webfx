@@ -156,11 +156,9 @@ public class BrowserFXController implements TabManager {
             if (isFxml) {
                 browserTab = new FXTab(locale);
                 browserTab.getNavigationContext().goTo(url);
-
             } else if (isWebFx) {
-                final AppClassLoader appClassloader;
                 try {
-                    appClassloader = new AppClassLoader(url);
+                    final AppClassLoader appClassloader = new AppClassLoader(url);
                     browserTab = new FXTab(locale, appClassloader);
                     browserTab.getNavigationContext().goTo(appClassloader.getFxml());
                 } catch (final IOException e) {

@@ -48,6 +48,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.geometry.NodeOrientation;
 import javafx.scene.Node;
 import javafx.scene.layout.AnchorPane;
+import javarestart.AppClassLoader;
 
 import javax.script.*;
 import java.io.IOException;
@@ -140,14 +141,16 @@ public class WebFXView extends AnchorPane {
         initLocalization();
 
         try {
-            fxmlLoader = new FXMLLoader(pageContext.getLocation(), resourceBundle);
+            final ClassLoader oldClassloader = Thread.currentThread().getContextClassLoader();
 
             if (cl != null) {
-                fxmlLoader.setClassLoader(cl);
+                Thread.currentThread().setContextClassLoader(cl);
             }
 
+            fxmlLoader = new FXMLLoader(pageContext.getLocation(), resourceBundle);
+            final Node loadedNode = fxmlLoader.load();
 
-            Node loadedNode = (Node) fxmlLoader.load();
+            Thread.currentThread().setContextClassLoader(oldClassloader);
 
             setTopAnchor(loadedNode, 0.0);
             setBottomAnchor(loadedNode, 0.0);
@@ -220,7 +223,7 @@ public class WebFXView extends AnchorPane {
      *
      * @param loader
      */
-    private void hackScriptEngine(FXMLLoader loader) {
+    private void hackScriptEngine(final FXMLLoader loader) {
         try {
             Field fse = loader.getClass().getDeclaredField("scriptEngine");
             fse.setAccessible(true);
@@ -230,10 +233,17 @@ public class WebFXView extends AnchorPane {
         }
     }
 
-    private void initLocalization() {
-        Locale _locale = locale == null ? Locale.getDefault() : locale;
-        ResourceBundleLoader rbl = new ResourceBundleLoader(pageContext, _locale);
-        resourceBundle = rbl.findBundle();
+    private boolean isWebFX() {
+        return cl != null;
     }
 
+    private void initLocalization() {
+        final Locale _locale = locale == null ? Locale.getDefault() : locale;
+        if (isWebFX()) {
+            resourceBundle = ((AppClassLoader) cl).getResourceBundle(locale);
+        } else {
+            final ResourceBundleLoader rbl = new ResourceBundleLoader(pageContext, _locale);
+            resourceBundle = rbl.findBundle();
+        }
+    }
 }

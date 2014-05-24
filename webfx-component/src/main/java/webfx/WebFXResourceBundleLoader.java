@@ -56,20 +56,20 @@ import java.util.logging.Logger;
  *
  * @author Bruno Borges <bruno.borges at oracle.com>
  */
-public class ResourceBundleLoader {
+public class WebFXResourceBundleLoader {
 
-    private static final Logger LOGGER = Logger.getLogger(ResourceBundleLoader.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(WebFXResourceBundleLoader.class.getName());
 
     private final Locale locale;
     private final PageContext pageContext;
 
-    public ResourceBundleLoader(final PageContext pageContext,
-                                final Locale locale) {
+    public WebFXResourceBundleLoader(final PageContext pageContext,
+                                     final Locale locale) {
         this.pageContext = pageContext;
         this.locale = locale == null ? Locale.getDefault() : locale;
     }
 
-    public ResourceBundleLoader(final PageContext pageContext) {
+    public WebFXResourceBundleLoader(final PageContext pageContext) {
         this(pageContext, Locale.getDefault());
     }
 
@@ -82,7 +82,7 @@ public class ResourceBundleLoader {
 
         for (final String bundleName : bundleNames) {
             try {
-                final URL urlBundle = new URL(baseURL.toString() + '/' + bundleName);
+                URL urlBundle = new URL(baseURL.toString() + "/" + bundleName);
 
                 try (InputStream bundleIS = urlBundle.openStream()) {
                     found = new PropertyResourceBundle(bundleIS);
@@ -92,7 +92,7 @@ public class ResourceBundleLoader {
                     LOGGER.log(Level.WARNING, "Bundle not found: {0}", bundleName);
                     LOGGER.log(Level.FINEST, "Bundle not found: " + bundleName, ex);
                 }
-            } catch (final MalformedURLException ex) {
+            } catch (MalformedURLException ex) {
                 LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
             }
         }
