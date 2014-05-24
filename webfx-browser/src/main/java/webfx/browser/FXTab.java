@@ -39,7 +39,6 @@
  */
 package webfx.browser;
 
-import java.util.Locale;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.ReadOnlyStringWrapper;
@@ -47,6 +46,8 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Node;
 import webfx.NavigationContext;
 import webfx.WebFXRegion;
+
+import java.util.Locale;
 
 /**
  *
@@ -68,6 +69,7 @@ public class FXTab implements BrowserTab {
         this();
         webfx.setLocale(locale);
     }
+
 
     @Override
     public ObjectProperty<Node> contentProperty() {

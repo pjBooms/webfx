@@ -15,3 +15,4 @@ nbactions.xml
 /webfx-mbean/target/
 /webfx-browser-mvn/target/
 /webfx-browser/target/
+*.iml

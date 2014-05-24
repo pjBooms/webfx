@@ -47,16 +47,18 @@ import java.net.URL;
  */
 public interface NavigationContext {
 
-    public void forward();
+    void forward();
 
-    public void back();
+    void back();
 
-    public void goTo(URL url);
+    void goTo(URL url);
 
-    public void goTo(String url);
+    void goTo(String url);
 
-    public void launch(String url);
+    void launch(String url);
     
-    public void reload();
+    void reload();
+
+    String getUrl();
 
 }

@@ -39,11 +39,6 @@
  */
 package webfx.browser;
 
-import webfx.JavaRestartURLHandler;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyStringProperty;
@@ -60,7 +55,13 @@ import org.w3c.dom.events.Event;
 import org.w3c.dom.events.EventListener;
 import org.w3c.dom.events.EventTarget;
 import org.w3c.dom.html.HTMLAnchorElement;
+import webfx.JavaRestartURLHandler;
 import webfx.NavigationContext;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -68,20 +69,27 @@ import webfx.NavigationContext;
  */
 public class HTMLTab implements BrowserTab {
 
-    final WebView browser;
-    final WebEngine webEngine;
+    private final WebView browser;
+    private final WebEngine webEngine;
     private SimpleObjectProperty<Node> contentProperty;
     private TabManager tabManager;
 
+    public HTMLTab(final HTMLTab anotherTab) {
+        this.browser = anotherTab.getBrowser();
+        this.webEngine = anotherTab.getWebEngine();
+        this.contentProperty = anotherTab.contentProperty;
+        this.tabManager = anotherTab.tabManager;
+    }
+
     public HTMLTab() {
         browser = new WebView();
-        webEngine = browser.getEngine();
-        contentProperty = new SimpleObjectProperty<>((Node) browser);
-        webEngine.getLoadWorker().stateProperty().addListener(new ChangeListener<State>() {
+        webEngine = getBrowser().getEngine();
+        contentProperty = new SimpleObjectProperty<>((Node) getBrowser());
+        getWebEngine().getLoadWorker().stateProperty().addListener(new ChangeListener<State>() {
             @Override
             public void changed(ObservableValue<? extends State> ov, State oldv, State newv) {
                 if (newv == State.SUCCEEDED) {
-                    Document document = (Document) webEngine.executeScript("document");
+                    Document document = (Document) getWebEngine().executeScript("document");
                     NodeList nodeList = document.getElementsByTagName("a");
                     for (int i = 0; i < nodeList.getLength(); i++) {
                         EventTarget n = (EventTarget) nodeList.item(i);
@@ -149,19 +157,26 @@ public class HTMLTab implements BrowserTab {
     public NavigationContext getNavigationContext() {
         return new NavigationContext() {
 
+            private String url;
+
             @Override
             public void reload() {
-                webEngine.reload();
+                getWebEngine().reload();
+            }
+
+            @Override
+            public String getUrl() {
+                return url;
             }
 
             @Override
             public void back() {
-                webEngine.executeScript("history.back()");
+                getWebEngine().executeScript("history.back()");
             }
 
             @Override
             public void forward() {
-                webEngine.executeScript("history.forward()");
+                getWebEngine().executeScript("history.forward()");
             }
 
             @Override
@@ -171,14 +186,15 @@ public class HTMLTab implements BrowserTab {
 
             @Override
             public void goTo(String location) {
-                webEngine.load(location);
+                url = location;
+                getWebEngine().load(location);
             }
 
             @Override
             public void launch(String location) {
                 try {
                     JavaRestartURLHandler.launch(location,
-                            new URLVerifier(webEngine.getLocation()).getBasePath().toExternalForm());
+                            new URLVerifier(getWebEngine().getLocation()).getBasePath().toExternalForm());
                 } catch (MalformedURLException e) {
                 }
             }
@@ -189,5 +205,13 @@ public class HTMLTab implements BrowserTab {
     @Override
     public boolean isStoppable() {
         return true;
+    }
+
+    public WebView getBrowser() {
+        return browser;
+    }
+
+    public WebEngine getWebEngine() {
+        return webEngine;
     }
 }

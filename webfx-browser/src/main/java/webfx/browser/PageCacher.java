@@ -8,9 +8,10 @@ import java.net.URL;
  * PageCacher interface
  */
 public interface PageCacher {
-    void put(final URL url);
-    void update(final URL url);
+    void put(final URL url, final BrowserTab tabToCache);
     void delete(final URL url);
+    void delete(final String url);
     BrowserTab get(final URL url);
     DateTime pageLastUpdate(final URL url);
+    boolean wasCachedAndNotNeedToBeUpdate(final URL url);
 }

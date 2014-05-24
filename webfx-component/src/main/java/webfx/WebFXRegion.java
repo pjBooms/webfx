@@ -39,6 +39,10 @@
  */
 package webfx;
 
+import javafx.beans.property.ReadOnlyStringProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.scene.layout.AnchorPane;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -46,10 +50,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import javafx.beans.property.ReadOnlyStringProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.scene.layout.AnchorPane;
 
 /**
  *
@@ -115,6 +115,7 @@ public final class WebFXRegion extends AnchorPane {
 
         private int currentURLHistoryIndex = -1;
         private List<URL> urlHistory = new ArrayList<>();
+        private String url;
 
         @Override
         public void forward() {
@@ -169,7 +170,7 @@ public final class WebFXRegion extends AnchorPane {
                     Logger.getLogger(WebFXView.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
-
+            url = url;
             goTo(destination);
         }
 
@@ -182,6 +183,11 @@ public final class WebFXRegion extends AnchorPane {
         @Override
         public void reload() {
             WebFXRegion.this.load();
+        }
+
+        @Override
+        public String getUrl() {
+            return url;
         }
     }
 

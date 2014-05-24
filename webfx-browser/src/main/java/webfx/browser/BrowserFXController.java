@@ -52,6 +52,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -63,7 +64,9 @@ import java.util.logging.Logger;
 public class BrowserFXController implements TabManager {
 
     private static final Logger LOGGER = Logger.getLogger(BrowserFXController.class.getName());
-    public static final String HOME_PAGE = "javarestart.jelasticloud.com";
+    private static final String HOME_PAGE = "javarestart.jelasticloud.com";
+    private static final PageCacher cacher = new SimpleCacher();
+
     /**
      * Components
      */
@@ -87,7 +90,7 @@ public class BrowserFXController implements TabManager {
      * Internal
      */
     private SingleSelectionModel<Tab> selectionTab;
-    private final ConcurrentHashMap<Integer, BrowserTab> browserMap = new ConcurrentHashMap<>();
+    private final Map<Integer, BrowserTab> browserMap = new ConcurrentHashMap<>();
     private Locale locale;
 
     public void exit() {
@@ -126,6 +129,8 @@ public class BrowserFXController implements TabManager {
         LOGGER.info("Closing Tab...");
         if (tabPane.getTabs().size() > 1) {
             int indexBrowserTab = selectionTab.getSelectedIndex();
+            final String url = browserMap.get(indexBrowserTab).getNavigationContext().getUrl();
+            cacher.delete(url);
             browserMap.remove(indexBrowserTab);
             tabPane.getTabs().remove(selectionTab.getSelectedIndex());
         }
@@ -158,12 +163,24 @@ public class BrowserFXController implements TabManager {
 
         Platform.runLater(() -> {
             BrowserTab browserTab;
-            if (isFxml) {
-                browserTab = new FXTab(locale);
-                browserTab.getNavigationContext().goTo(url);
-            } else {
-                browserTab = new HTMLTab();
-                browserTab.getNavigationContext().goTo(url);
+            if(cacher.wasCachedAndNotNeedToBeUpdate(url)) {
+                LOGGER.info("Get from cache " + url);
+                if(!isFxml) {
+                    browserTab = new HTMLTab((HTMLTab)cacher.get(url));
+                }
+                else {
+                    browserTab  = cacher.get(url);
+                }
+            }
+            else {
+                if (isFxml) {
+                        browserTab = new FXTab(locale);
+                        browserTab.getNavigationContext().goTo(url);
+                } else {
+                    browserTab = new HTMLTab();
+                    browserTab.getNavigationContext().goTo(url);
+                }
+                cacher.put(url, browserTab);
             }
 
             browserTab.setTabManager(this);
@@ -175,6 +192,8 @@ public class BrowserFXController implements TabManager {
             LOGGER.log(Level.INFO, "Title used for new tab: {0}", browserTab.titleProperty().get());
         });
     }
+
+
 
     public void initialize() {
         urlField.focusedProperty().addListener((ov, oldValue, newValue) -> {
