@@ -39,11 +39,6 @@
  */
 package webfx.browser;
 
-import webfx.JavaRestartURLHandler;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyStringProperty;
@@ -60,7 +55,13 @@ import org.w3c.dom.events.Event;
 import org.w3c.dom.events.EventListener;
 import org.w3c.dom.events.EventTarget;
 import org.w3c.dom.html.HTMLAnchorElement;
+import webfx.JavaRestartURLHandler;
 import webfx.NavigationContext;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -182,7 +183,6 @@ public class HTMLTab implements BrowserTab {
                 } catch (MalformedURLException e) {
                 }
             }
-
         };
     }
 

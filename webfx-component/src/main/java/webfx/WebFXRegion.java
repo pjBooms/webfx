@@ -39,6 +39,10 @@
  */
 package webfx;
 
+import javafx.beans.property.ReadOnlyStringProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.scene.layout.AnchorPane;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -46,10 +50,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import javafx.beans.property.ReadOnlyStringProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.scene.layout.AnchorPane;
 
 /**
  *
@@ -62,9 +62,15 @@ public final class WebFXRegion extends AnchorPane {
     private final NavigationContext navigationContext;
     private final ReadOnlyStringProperty currentTitle = new SimpleStringProperty();
     private Locale locale;
+    private ClassLoader cl = null;
 
     public WebFXRegion() {
         navigationContext = new NavigationContextImpl();
+    }
+
+    public WebFXRegion(final ClassLoader cl) {
+        this();
+        this.cl = cl;
     }
 
     public WebFXRegion(URL url) {
@@ -89,6 +95,10 @@ public final class WebFXRegion extends AnchorPane {
         getChildren().clear();
 
         defaultView = new WebFXView(navigationContext);
+        if (this.cl != null) {
+            defaultView.setFxmlClassLoader(cl);
+        }
+
         defaultView.setURL(url);
         defaultView.setLocale(locale);
         defaultView.load();

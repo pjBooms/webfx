@@ -39,14 +39,6 @@
  */
 package webfx;
 
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Locale;
-import java.util.ResourceBundle;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.ReadOnlyStringProperty;
@@ -56,11 +48,16 @@ import javafx.fxml.FXMLLoader;
 import javafx.geometry.NodeOrientation;
 import javafx.scene.Node;
 import javafx.scene.layout.AnchorPane;
-import javax.script.Bindings;
-import javax.script.ScriptContext;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineFactory;
-import javax.script.ScriptException;
+
+import javax.script.*;
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Locale;
+import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * {@literal WebFXView} is a {@link javafx.scene.Node} that manages an
@@ -82,13 +79,15 @@ public class WebFXView extends AnchorPane {
     private NavigationContext navigationContext;
     private final ReadOnlyStringProperty titleProperty = new SimpleStringProperty();
 
+    private ClassLoader cl;
+
     public WebFXView() {
         setNodeOrientation(NodeOrientation.LEFT_TO_RIGHT);
         getStyleClass().add("webfx-view");
         setFocusTraversable(true);
     }
 
-    public WebFXView(URL url) {
+    public WebFXView(final URL url) {
         this();
         this.urlProperty.set(url);
         load();
@@ -127,6 +126,10 @@ public class WebFXView extends AnchorPane {
         this.urlProperty.set(url);
     }
 
+    public final void setFxmlClassLoader(final ClassLoader cl) {
+        this.cl = cl;
+    }
+
     public final void load() {
         Platform.runLater(() -> internalLoad());
     }
@@ -138,6 +141,12 @@ public class WebFXView extends AnchorPane {
 
         try {
             fxmlLoader = new FXMLLoader(pageContext.getLocation(), resourceBundle);
+
+            if (cl != null) {
+                fxmlLoader.setClassLoader(cl);
+            }
+
+
             Node loadedNode = (Node) fxmlLoader.load();
 
             setTopAnchor(loadedNode, 0.0);

@@ -39,16 +39,16 @@
  */
 package webfx.browser;
 
-import java.util.Locale;
-import java.util.Map;
-import java.util.ResourceBundle;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+
+import java.util.Locale;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -102,13 +102,12 @@ public class WebFX extends Application {
         LOGGER.log(Level.INFO, "Locale: {0}", locale);
 
         if ((languageParamObj != null)
-                && ((String) languageParamObj).trim().length() > 0) {
-            if ((countryParamObj != null)
-                    && ((String) countryParamObj).trim().length() > 0) {
-                locale = new Locale(((String) languageParamObj).trim(),
-                        ((String) countryParamObj).trim());
+                && !languageParamObj.trim().isEmpty()) {
+            if ((countryParamObj != null) && !countryParamObj.trim().isEmpty()) {
+                locale = new Locale(languageParamObj.trim(),
+                        countryParamObj.trim());
             } else {
-                locale = new Locale(((String) languageParamObj).trim());
+                locale = new Locale(languageParamObj.trim());
             }
         }
 

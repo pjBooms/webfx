@@ -39,6 +39,17 @@
  */
 package webfx.browser;
 
+import javafx.application.Platform;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
+import javafx.fxml.FXML;
+import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javarestart.AppClassLoader;
+import webfx.JavaRestartURLHandler;
+
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -46,20 +57,6 @@ import java.util.Locale;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import webfx.JavaRestartURLHandler;
-import javafx.application.Platform;
-import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableList;
-import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.SingleSelectionModel;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
-import javafx.scene.control.TextField;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 
 /**
  *
@@ -147,18 +144,29 @@ public class BrowserFXController implements TabManager {
         }
 
         final URL url = urlVerifier.getLocation();
-
         if (urlVerifier.isJavaRestart()) {
             JavaRestartURLHandler.launch(url);
             return;
         }
         final boolean isFxml = urlVerifier.isFxml();
+        final boolean isWebFx = urlVerifier.isWebFX();
 
         Platform.runLater(() -> {
             BrowserTab browserTab;
             if (isFxml) {
                 browserTab = new FXTab(locale);
                 browserTab.getNavigationContext().goTo(url);
+
+            } else if (isWebFx) {
+                final AppClassLoader appClassloader;
+                try {
+                    appClassloader = new AppClassLoader(url);
+                    browserTab = new FXTab(locale, appClassloader);
+                    browserTab.getNavigationContext().goTo(appClassloader.getFxml());
+                } catch (final IOException e) {
+
+                    throw new IllegalStateException(e);
+                }
             } else {
                 browserTab = new HTMLTab();
                 browserTab.getNavigationContext().goTo(url);
