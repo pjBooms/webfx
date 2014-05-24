@@ -63,7 +63,7 @@ import java.util.logging.Logger;
 public class BrowserFXController implements TabManager {
 
     private static final Logger LOGGER = Logger.getLogger(BrowserFXController.class.getName());
-    public static final String HOME_PAGE = "javarestart.jelasticloud.com";
+    private static final String HOME_PAGE = "javarestart.jelasticloud.com";
     /**
      * Components
      */
