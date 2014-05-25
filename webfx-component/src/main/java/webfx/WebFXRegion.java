@@ -42,7 +42,9 @@ package webfx;
 import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.layout.AnchorPane;
+import javarestart.AppClassLoader;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -175,6 +177,15 @@ public final class WebFXRegion extends AnchorPane {
                 URL basePath = defaultView.getPageContext().getBasePath();
                 try {
                     destination = new URL(basePath.toString() + "/" + url);
+                    if (!url.endsWith(".fxml")) {
+                        try {
+                            AppClassLoader cl_ = new AppClassLoader(destination);
+                            destination = cl_.getFxml();
+                            cl = cl_;
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
                 } catch (MalformedURLException ex) {
                     Logger.getLogger(WebFXView.class.getName()).log(Level.SEVERE, null, ex);
                 }
