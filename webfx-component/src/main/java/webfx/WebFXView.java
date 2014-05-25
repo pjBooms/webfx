@@ -174,11 +174,13 @@ public class WebFXView extends AnchorPane {
                 Bindings wfxb = scriptEngine.getBindings(ScriptContext.GLOBAL_SCOPE);
                 wfxb.put("__webfx_i18n", resourceBundle);
                 wfxb.put("__webfx_navigation", navigationContext);
+                wfxb.put("__webfx_scene", getScene());
 
                 scriptEngine.eval("if (typeof $webfx === 'undefined') $webfx = {title:'Untitled'};");
-                scriptEngine.eval("if (typeof $webfx.initWebFX === 'function') $webfx.initWebFX();");
                 scriptEngine.eval("$webfx.i18n = __webfx_i18n;");
+                scriptEngine.eval("$webfx.scene = __webfx_scene;");
                 scriptEngine.eval("$webfx.navigation = __webfx_navigation;");
+                scriptEngine.eval("if (typeof $webfx.initWebFX === 'function') $webfx.initWebFX();");
 
                 loadTitle();
             }
