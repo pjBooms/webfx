@@ -168,8 +168,14 @@ public final class WebFXRegion extends AnchorPane {
             WebFXRegion.this.loadUrl(url);
 
             if (incrementHistory) {
-                urlHistory.add(new HistoryEntry(url, cl));
-                currentURLHistoryIndex = urlHistory.size() - 1;
+                HistoryEntry history = new HistoryEntry(url, cl);
+                if (currentURLHistoryIndex == urlHistory.size() - 1) {
+                    urlHistory.add(history);
+                    currentURLHistoryIndex = urlHistory.size() - 1;
+                } else {
+                    ++currentURLHistoryIndex;
+                    urlHistory.set(currentURLHistoryIndex, history);
+                }
             }
         }
 
