@@ -53,7 +53,6 @@ import javarestart.AppClassLoader;
 import javax.script.*;
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -175,11 +174,13 @@ public class WebFXView extends AnchorPane {
                 Bindings wfxb = scriptEngine.getBindings(ScriptContext.GLOBAL_SCOPE);
                 wfxb.put("__webfx_i18n", resourceBundle);
                 wfxb.put("__webfx_navigation", navigationContext);
+                wfxb.put("__webfx_scene", getScene());
 
                 scriptEngine.eval("if (typeof $webfx === 'undefined') $webfx = {title:'Untitled'};");
-                scriptEngine.eval("if (typeof $webfx.initWebFX === 'function') $webfx.initWebFX();");
                 scriptEngine.eval("$webfx.i18n = __webfx_i18n;");
+                scriptEngine.eval("$webfx.scene = __webfx_scene;");
                 scriptEngine.eval("$webfx.navigation = __webfx_navigation;");
+                scriptEngine.eval("if (typeof $webfx.initWebFX === 'function') $webfx.initWebFX();");
 
                 loadTitle();
             } else {
@@ -187,8 +188,6 @@ public class WebFXView extends AnchorPane {
                 int lastSlash = path.lastIndexOf('/');
                 Platform.runLater(() -> ((SimpleStringProperty) titleProperty).set(path.substring(lastSlash+1)));
             }
-        } catch (MalformedURLException ex) {
-            Logger.getLogger(WebFXView.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException | ScriptException ex) {
             Logger.getLogger(WebFXView.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -198,16 +197,17 @@ public class WebFXView extends AnchorPane {
         String title = "Untitled";
         if (scriptEngine != null) {
             try {
-                Object objTitle = scriptEngine.eval("$webfx.title");
+                final Object objTitle = scriptEngine.eval("$webfx.title");
                 title = objTitle.toString();
 
                 LOGGER.log(Level.INFO, "Title found: {0}", title);
 
-                if (resourceBundle != null && title.startsWith("%") && resourceBundle.containsKey(title.substring(1))) {
+                if (resourceBundle != null && title.startsWith("%")
+                    && resourceBundle.containsKey(title.substring(1))) {
                     title = resourceBundle.getString(title.substring(1));
                     LOGGER.log(Level.INFO, "Actual title: {0}", title);
                 }
-            } catch (ScriptException ex) {
+            } catch (final ScriptException ex) {
                 Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             }
         }
