@@ -125,14 +125,26 @@ public final class WebFXRegion extends AnchorPane {
 
     private class NavigationContextImpl implements NavigationContext {
 
+        private class HistoryEntry {
+            URL url;
+            ClassLoader cl;
+
+            private HistoryEntry(URL url, ClassLoader cl) {
+                this.url = url;
+                this.cl = cl;
+            }
+        }
+
         private int currentURLHistoryIndex = -1;
-        private List<URL> urlHistory = new ArrayList<>();
+        private List<HistoryEntry> urlHistory = new ArrayList<>();
 
         @Override
         public void forward() {
             int nextIndex = currentURLHistoryIndex + 1;
             if (nextIndex < urlHistory.size()) {
-                URL nextURL = urlHistory.get(nextIndex);
+                HistoryEntry entry = urlHistory.get(nextIndex);
+                URL nextURL = entry.url;
+                cl = entry.cl;
                 currentURLHistoryIndex++;
                 loadUrl(nextURL, false);
             }
@@ -146,7 +158,9 @@ public final class WebFXRegion extends AnchorPane {
             }
 
             currentURLHistoryIndex--;
-            URL previousURL = urlHistory.get(currentURLHistoryIndex);
+            HistoryEntry entry = urlHistory.get(currentURLHistoryIndex);
+            URL previousURL = entry.url;
+            cl = entry.cl;
             loadUrl(previousURL, false);
         }
 
@@ -154,7 +168,7 @@ public final class WebFXRegion extends AnchorPane {
             WebFXRegion.this.loadUrl(url);
 
             if (incrementHistory) {
-                urlHistory.add(url);
+                urlHistory.add(new HistoryEntry(url, cl));
                 currentURLHistoryIndex = urlHistory.size() - 1;
             }
         }
