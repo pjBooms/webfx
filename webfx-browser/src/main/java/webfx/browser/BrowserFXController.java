@@ -65,6 +65,7 @@ import java.util.logging.Logger;
 public class BrowserFXController implements TabManager {
 
     private static final Logger LOGGER = Logger.getLogger(BrowserFXController.class.getName());
+    private static final String HOME_PAGE = "javarestart.jelasticloud.com";
     /**
      * Components
      */
@@ -82,6 +83,8 @@ public class BrowserFXController implements TabManager {
     private Button backButton;
     @FXML
     private Button forwardButton;
+    @FXML
+    private Button homeButton;
     /**
      * Internal
      */
@@ -92,6 +95,10 @@ public class BrowserFXController implements TabManager {
     public void exit() {
         LOGGER.info("Exiting...");
         System.exit(0);
+    }
+
+    public void home() {
+        openPage(HOME_PAGE);
     }
 
     public void newTab() {
@@ -224,6 +231,7 @@ public class BrowserFXController implements TabManager {
         setButtonIcon(backButton, "left", size);
         setButtonIcon(forwardButton, "right", size);
         setButtonIcon(reloadButton, "clock", size);
+        setButtonIcon(homeButton, "home", size);
     }
 
     private void setButtonIcon(Button button, String icon, int size) {

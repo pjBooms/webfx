@@ -182,6 +182,10 @@ public class WebFXView extends AnchorPane {
                 scriptEngine.eval("$webfx.navigation = __webfx_navigation;");
 
                 loadTitle();
+            } else {
+                String path = pageContext.getLocation().getFile();
+                int lastSlash = path.lastIndexOf('/');
+                Platform.runLater(() -> ((SimpleStringProperty) titleProperty).set(path.substring(lastSlash+1)));
             }
         } catch (MalformedURLException ex) {
             Logger.getLogger(WebFXView.class.getName()).log(Level.SEVERE, null, ex);
