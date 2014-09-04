@@ -48,6 +48,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
@@ -64,15 +65,20 @@ public final class WebFXRegion extends AnchorPane {
     private final NavigationContext navigationContext;
     private final ReadOnlyStringProperty currentTitle = new SimpleStringProperty();
     private Locale locale;
-    private ClassLoader cl = null;
+    private AppClassLoader cl = null;
+
+    private static HashMap<URL, AppClassLoader> classloaders = new HashMap<>();
 
     public WebFXRegion() {
         navigationContext = new NavigationContextImpl();
     }
 
-    public WebFXRegion(final ClassLoader cl) {
+    public WebFXRegion(final AppClassLoader cl) {
         this();
         this.cl = cl;
+        if (cl != null) {
+            classloaders.put(cl.getBaseURL(), cl);
+        }
     }
 
     public WebFXRegion(URL url) {
@@ -96,11 +102,7 @@ public final class WebFXRegion extends AnchorPane {
 
         getChildren().clear();
 
-        defaultView = new WebFXView(navigationContext);
-        if (this.cl != null) {
-            defaultView.setFxmlClassLoader(cl);
-        }
-
+        defaultView = new WebFXView(navigationContext, this.cl);
         defaultView.setURL(url);
         defaultView.setLocale(locale);
         defaultView.load();
@@ -127,9 +129,9 @@ public final class WebFXRegion extends AnchorPane {
 
         private class HistoryEntry {
             URL url;
-            ClassLoader cl;
+            AppClassLoader cl;
 
-            private HistoryEntry(URL url, ClassLoader cl) {
+            private HistoryEntry(URL url, AppClassLoader cl) {
                 this.url = url;
                 this.cl = cl;
             }
@@ -184,6 +186,64 @@ public final class WebFXRegion extends AnchorPane {
             loadUrl(url, true);
         }
 
+        private URL resolveDestination(String relPath) {
+            URL context = defaultView.getPageContext().getLocation();
+            //TODO: if base path contains ?resource in query we should append the resource to the path.
+            URL destination = null;
+            try {
+                destination = new URL(context, relPath);
+
+                if ((cl != null) && destination.toString().startsWith(cl.getBaseURL().toString())) {
+                    //the resource within the same classloader
+                    if (destination.sameFile(cl.getBaseURL())) {
+                        //we need to resolve main FXMl again
+                        destination = cl.getFxml();
+                    }
+                } else {
+                    String appsURL = (cl == null? new URL(context, "/apps") : new URL(cl.getBaseURL(), ".")).toString();
+                    if (destination.toString().startsWith(appsURL)) {
+                        //the resource in some other classloader
+                        String destRest = destination.toString().substring(appsURL.length());
+                        if (!destRest.isEmpty()) {
+                            if (destRest.charAt(0) == '/') {
+                                destRest = destRest.substring(1);
+                            }
+                            if (!destRest.isEmpty()) {
+                                int slashPos = destRest.indexOf('/');
+                                String newApp;
+                                if (slashPos >= 0) {
+                                    newApp = destRest.substring(0, slashPos);
+                                } else {
+                                    newApp = destRest;
+                                }
+                                URL newAppURL = new URL(appsURL + '/' + newApp);
+                                if (classloaders.containsKey(newAppURL)) {
+                                    cl = classloaders.get(newAppURL);
+                                } else {
+                                    try {
+                                        cl = new AppClassLoader(newAppURL);
+                                        classloaders.put(newAppURL, cl);
+                                    } catch (IOException e) {
+                                        //failed to obtain new classloader
+                                        return destination;
+                                    }
+                                }
+                                if (newApp == destRest) {
+                                    //fetch main fxml as well
+                                    destination = cl.getFxml();
+                                }
+                            }
+                        }
+                    } else {
+                        // TODO: if app resides on some other path, we should try to find it
+                    }
+                }
+            } catch (MalformedURLException ex) {
+                Logger.getLogger(WebFXView.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            return destination;
+        }
+
         @Override
         public void goTo(String url) {
             URL destination = null;
@@ -194,21 +254,7 @@ public final class WebFXRegion extends AnchorPane {
                     Logger.getLogger(WebFXView.class.getName()).log(Level.SEVERE, null, ex);
                 }
             } else {
-                URL basePath = defaultView.getPageContext().getBasePath();
-                try {
-                    destination = new URL(basePath.toString() + "/" + url);
-                    if (!url.endsWith(".fxml")) {
-                        try {
-                            AppClassLoader cl_ = new AppClassLoader(destination);
-                            destination = cl_.getFxml();
-                            cl = cl_;
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                } catch (MalformedURLException ex) {
-                    Logger.getLogger(WebFXView.class.getName()).log(Level.SEVERE, null, ex);
-                }
+                destination = resolveDestination(url);
             }
 
             goTo(destination);

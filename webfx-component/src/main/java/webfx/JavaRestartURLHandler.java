@@ -28,11 +28,15 @@ public class JavaRestartURLHandler {
 
     public static final String JAVA_PROTOCOL = "java://";
 
-    public static String convertToHttp(String location) {
-        if (location.startsWith(JAVA_PROTOCOL)) {
-            return "http://" + location.substring(JAVA_PROTOCOL.length());
+    public static String convertToHttp(String location, String protocol) {
+        if (location.startsWith(protocol)) {
+            return "http://" + location.substring(protocol.length());
         }
         return location;
+    }
+
+    public static String convertToHttp(String location) {
+        return convertToHttp(location, JAVA_PROTOCOL);
     }
 
     public static void launch(String location, String basePath) {

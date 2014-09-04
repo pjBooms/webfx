@@ -17,10 +17,6 @@
 */
 package webfx;
 
-import javarestart.JavaRestartLauncher;
-
-import java.net.URL;
-
 /**
  * @author Nikita Lipsky
  */
@@ -29,24 +25,6 @@ public class WebFXURLHandler {
     public static final String WEB_FX_PROTOCOL = "wfx://";
 
     public static String convertToHttp(final String location) {
-        if (location.startsWith(WEB_FX_PROTOCOL)) {
-            final String url = "http://" + location.substring(WEB_FX_PROTOCOL.length());
-            return url;
-        }
-        return location;
-    }
-
-    public static void launch(String location, String basePath) {
-        final String path;
-        if (location.startsWith(WEB_FX_PROTOCOL)) {
-            path = convertToHttp(location);
-        } else {
-            path = basePath + '/' + location;
-        }
-        JavaRestartLauncher.fork(path);
-    }
-
-    public static void launch(final URL url) {
-        JavaRestartLauncher.fork(url.toExternalForm());
+        return JavaRestartURLHandler.convertToHttp(location, WEB_FX_PROTOCOL);
     }
 }
