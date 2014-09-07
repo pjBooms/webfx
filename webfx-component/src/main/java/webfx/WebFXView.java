@@ -230,12 +230,7 @@ public class WebFXView extends AnchorPane {
     }
 
     private void initLocalization() {
-        final Locale _locale = locale == null ? Locale.getDefault() : locale;
-        if (cl != null) {
-            resourceBundle = cl.getResourceBundle(locale);
-        } else {
-            final ResourceBundleLoader rbl = new ResourceBundleLoader(pageContext, _locale);
-            resourceBundle = rbl.findBundle();
-        }
+        final ResourceBundleLoader rbl = new ResourceBundleLoader(pageContext, locale);
+        resourceBundle = rbl.findBundle();
     }
 }
