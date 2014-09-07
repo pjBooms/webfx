@@ -46,8 +46,10 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javarestart.AppClassLoader;
 import webfx.JavaRestartURLHandler;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -63,7 +65,7 @@ import java.util.logging.Logger;
 public class BrowserFXController implements TabManager {
 
     private static final Logger LOGGER = Logger.getLogger(BrowserFXController.class.getName());
-    private static final String HOME_PAGE = "javarestart.jelasticloud.com";
+    private static final String HOME_PAGE = "localhost:8080";
     /**
      * Components
      */
@@ -149,18 +151,27 @@ public class BrowserFXController implements TabManager {
         }
 
         final URL url = urlVerifier.getLocation();
-
         if (urlVerifier.isJavaRestart()) {
             JavaRestartURLHandler.launch(url);
             return;
         }
         final boolean isFxml = urlVerifier.isFxml();
+        final boolean isWebFx = urlVerifier.isWebFX();
 
         Platform.runLater(() -> {
             BrowserTab browserTab;
             if (isFxml) {
                 browserTab = new FXTab(locale);
                 browserTab.getNavigationContext().goTo(url);
+            } else if (isWebFx) {
+                try {
+                    final AppClassLoader appClassloader = new AppClassLoader(url);
+                    browserTab = new FXTab(locale, appClassloader);
+                    browserTab.getNavigationContext().goTo(appClassloader.getFxml());
+                } catch (final IOException e) {
+
+                    throw new IllegalStateException(e);
+                }
             } else {
                 browserTab = new HTMLTab();
                 browserTab.getNavigationContext().goTo(url);

@@ -63,35 +63,36 @@ public class ResourceBundleLoader {
     private final Locale locale;
     private final PageContext pageContext;
 
-    public ResourceBundleLoader(PageContext pageContext, Locale locale) {
+    public ResourceBundleLoader(final PageContext pageContext,
+                                final Locale locale) {
         this.pageContext = pageContext;
         this.locale = locale == null ? Locale.getDefault() : locale;
     }
 
-    public ResourceBundleLoader(PageContext pageContext) {
+    public ResourceBundleLoader(final PageContext pageContext) {
         this(pageContext, Locale.getDefault());
     }
 
-    protected ResourceBundle findBundle() {
+    public ResourceBundle findBundle() {
         ResourceBundle found = null;
 
-        Iterable<String> bundleNames = constructBundleFileNames();
+        final Iterable<String> bundleNames = constructBundleFileNames();
 
-        URL baseURL = pageContext.getBasePath();
+        final URL baseURL = pageContext.getBasePath();
 
-        for (String bundleName : bundleNames) {
+        for (final String bundleName : bundleNames) {
             try {
-                URL urlBundle = new URL(baseURL.toString() + "/" + bundleName);
+                final URL urlBundle = new URL(baseURL.toString() + '/' + bundleName);
 
                 try (InputStream bundleIS = urlBundle.openStream()) {
                     found = new PropertyResourceBundle(bundleIS);
                     LOGGER.log(Level.INFO, "Bundle found: {0}", bundleName);
                     break;
-                } catch (IOException ex) {
+                } catch (final IOException ex) {
                     LOGGER.log(Level.WARNING, "Bundle not found: {0}", bundleName);
                     LOGGER.log(Level.FINEST, "Bundle not found: " + bundleName, ex);
                 }
-            } catch (MalformedURLException ex) {
+            } catch (final MalformedURLException ex) {
                 LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
             }
         }
@@ -100,13 +101,13 @@ public class ResourceBundleLoader {
     }
 
     private Iterable<String> constructBundleFileNames() {
-        String filename = pageContext.getPageName();
+        final String filename = pageContext.getPageName();
 
-        List<String> names = new ArrayList<>();
-        String l0 = new Locale(locale.getLanguage(), locale.getCountry()).toString();
-        String l1 = new Locale(locale.getLanguage()).toString();
-        names.add(filename + "_" + l0 + ".properties");
-        names.add(filename + "_" + l1 + ".properties");
+        final List<String> names = new ArrayList<>(3);
+        final String l0 = new Locale(locale.getLanguage(), locale.getCountry()).toString();
+        final String l1 = new Locale(locale.getLanguage()).toString();
+        names.add(filename + '_' + l0 + ".properties");
+        names.add(filename + '_' + l1 + ".properties");
         names.add(filename + ".properties");
 
         return Collections.unmodifiableList(names);

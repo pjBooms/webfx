@@ -54,7 +54,7 @@ public class PageContext {
     private URL basePath;
     private String pageName;
 
-    public PageContext(URL location) {
+    public PageContext(final URL location) {
         this.location = location;
         extractBasePath();
     }
@@ -64,34 +64,34 @@ public class PageContext {
             return;
         }
 
-        int lastSlash = location.getPath().lastIndexOf('/');
+        final int lastSlash = location.getPath().lastIndexOf('/');
 
         if (lastSlash == -1) {
             pageName = "index";
             basePath = location;
         }
 
-        String file = location.getPath();
-        String path = (lastSlash == -1) ? "" : file.substring(0, lastSlash);
+        final String file = location.getPath();
+        final String path = (lastSlash == -1)
+                ? ""
+                : file.substring(0, lastSlash)
+                ;
 
         URL base = null;
-
         try {
             base = new URL(location.getProtocol(), location.getHost(), location.getPort(), path);
-        } catch (MalformedURLException ex) {
+        } catch (final MalformedURLException ex) {
             Logger.getLogger(PageContext.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         pageName = file.substring(lastSlash + 1);
-        int indexOfExtension = pageName.indexOf('.');
+        final int indexOfExtension = pageName.indexOf('.');
         if (indexOfExtension != 1) {
-            String extension = file.substring(file.lastIndexOf('.') + 1);
+            final String extension = file.substring(file.lastIndexOf('.') + 1);
 
-            if (!"fxml".equals(extension)) {
-                throw new IllegalArgumentException("This component only loads FXML pages. Point the URL property to an FXML file");
+            if ("fxml".equals(extension)) {
+                pageName = pageName.substring(0, indexOfExtension);
             }
-
-            pageName = pageName.substring(0, indexOfExtension);
         }
 
         this.basePath = base;
