@@ -77,7 +77,9 @@ import webfx.JavaRestartURLHandler;
 public class BrowserFXController implements TabManager {
 
     private static final Logger LOGGER = Logger.getLogger(BrowserFXController.class.getName());
-    private static final String HOME_PAGE = "localhost:8080";
+    private static final String HOME_PAGE = "http://javarestart.jelasticloud.com";
+//    private static final String HOME_PAGE = "localhost:8080";
+
     /**
      * Components
      */
