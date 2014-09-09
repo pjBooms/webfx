@@ -8,7 +8,11 @@ The purpose of this project is to investigate the capabilities of using JavaFX (
 
 "WebFX allows me to run the JVM in Raspberry Pi forever and evolve my JavaFX application by modifying FXML and Javascript on remote webserver" - [Bruno Borges](https://twitter.com/brunoborges/status/463187071872823296)
 
-Note
+Java ReStart integration
 =====
 It is forked version and it depends on Java ReStart project -- https://github.com/pjBooms/Java-ReStart.
 So please clone it first, build with Maven (launch "mvn install" from the root of that project), and after that you should be able to build WebFX.
+
+The integration allows you to reference remote classes from FXML pages
+(originally only JS could be referenced from FXML) and launch Java ReStart applications from the WebFX browser
+(https://github.com/pjBooms/webfx/tree/master/webfx-browser).
