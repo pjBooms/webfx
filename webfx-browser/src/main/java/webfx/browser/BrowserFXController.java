@@ -67,7 +67,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import webfx.browser.settings.SettingsController;
 import webfx.browser.util.FXUtil;
-import javarestart.AppClassLoader;
+import javarestart.WebClassLoader;
 import webfx.JavaRestartURLHandler;
 
 /**
@@ -201,9 +201,9 @@ public class BrowserFXController implements TabManager {
                 browserTab.getNavigationContext().goTo(url);
             } else if (isWebFx) {
                 try {
-                    final AppClassLoader appClassloader = new AppClassLoader(url);
-                    browserTab = new FXTab(locale, appClassloader);
-                    browserTab.getNavigationContext().goTo(appClassloader.getFxml());
+                    final WebClassLoader webClassloader = new WebClassLoader(url);
+                    browserTab = new FXTab(locale, webClassloader);
+                    browserTab.getNavigationContext().goTo(webClassloader.getFxml());
                 } catch (final IOException e) {
 
                     throw new IllegalStateException(e);

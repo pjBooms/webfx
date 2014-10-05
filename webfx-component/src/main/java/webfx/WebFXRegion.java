@@ -42,7 +42,7 @@ package webfx;
 import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.layout.AnchorPane;
-import javarestart.AppClassLoader;
+import javarestart.WebClassLoader;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -65,15 +65,15 @@ public final class WebFXRegion extends AnchorPane {
     private final NavigationContext navigationContext;
     private final ReadOnlyStringProperty currentTitle = new SimpleStringProperty();
     private Locale locale;
-    private AppClassLoader cl = null;
+    private WebClassLoader cl = null;
 
-    private static HashMap<URL, AppClassLoader> classloaders = new HashMap<>();
+    private static HashMap<URL, WebClassLoader> classloaders = new HashMap<>();
 
     public WebFXRegion() {
         navigationContext = new NavigationContextImpl();
     }
 
-    public WebFXRegion(final AppClassLoader cl) {
+    public WebFXRegion(final WebClassLoader cl) {
         this();
         this.cl = cl;
         if (cl != null) {
@@ -129,9 +129,9 @@ public final class WebFXRegion extends AnchorPane {
 
         private class HistoryEntry {
             URL url;
-            AppClassLoader cl;
+            WebClassLoader cl;
 
-            private HistoryEntry(URL url, AppClassLoader cl) {
+            private HistoryEntry(URL url, WebClassLoader cl) {
                 this.url = url;
                 this.cl = cl;
             }
@@ -221,7 +221,7 @@ public final class WebFXRegion extends AnchorPane {
                                     cl = classloaders.get(newAppURL);
                                 } else {
                                     try {
-                                        cl = new AppClassLoader(newAppURL);
+                                        cl = new WebClassLoader(newAppURL);
                                         classloaders.put(newAppURL, cl);
                                     } catch (IOException e) {
                                         //failed to obtain new classloader
