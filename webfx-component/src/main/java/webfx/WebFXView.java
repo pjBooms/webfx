@@ -169,11 +169,13 @@ public class WebFXView extends AnchorPane {
             hackScriptEngine(fxmlLoader);
 
             if (scriptEngine != null) {
-                ScriptingInitializer si = new ScriptingInitializer(scriptEngine, resourceBundle, navigationContext);
+                ScriptingInitializer si = new ScriptingInitializer(scriptEngine, resourceBundle, navigationContext, getScene());
                 loadTitle(si.getPageTitle());
+            } else {
+                String path = pageContext.getLocation().getFile();
+                int lastSlash = path.lastIndexOf('/');
+                Platform.runLater(() -> ((SimpleStringProperty) titleProperty).set(path.substring(lastSlash + 1)));
             }
-        } catch (MalformedURLException ex) {
-            Logger.getLogger(WebFXView.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
             Logger.getLogger(WebFXView.class.getName()).log(Level.SEVERE, null, ex);
         }

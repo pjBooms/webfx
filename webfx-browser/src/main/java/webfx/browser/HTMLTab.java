@@ -171,7 +171,6 @@ public class HTMLTab implements BrowserTab {
                 webEngine.load(location);
             }
 
-            @Override
             public void launch(String location) {
                 try {
                     JavaRestartURLHandler.launch(location,

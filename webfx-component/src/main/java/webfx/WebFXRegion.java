@@ -119,7 +119,7 @@ public final class WebFXRegion extends AnchorPane {
 
         getChildren().clear();
 
-        defaultView = new WebFXView(navigationContext);
+        defaultView = new WebFXView(navigationContext, cl);
         try {
             defaultView.setURL(new URL(getUrl()));
         } catch (MalformedURLException ex) {
