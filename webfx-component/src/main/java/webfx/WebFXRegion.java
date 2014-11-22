@@ -39,9 +39,6 @@
  */
 package webfx;
 
-import javafx.beans.property.ReadOnlyStringProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.scene.layout.AnchorPane;
 import javarestart.WebClassLoader;
 
 import java.io.IOException;
@@ -53,6 +50,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.beans.NamedArg;
+import javafx.beans.property.ReadOnlyStringProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.scene.layout.AnchorPane;
 
 /**
  *
@@ -60,7 +61,7 @@ import java.util.logging.Logger;
  */
 public final class WebFXRegion extends AnchorPane {
 
-    private URL url;
+    private final SimpleStringProperty urlProperty = new SimpleStringProperty();
     private WebFXView defaultView;
     private final NavigationContext navigationContext;
     private final ReadOnlyStringProperty currentTitle = new SimpleStringProperty();
@@ -86,12 +87,28 @@ public final class WebFXRegion extends AnchorPane {
         navigationContext.goTo(url);
     }
 
+    public WebFXRegion(@NamedArg("url") String url) throws MalformedURLException {
+        this(new URL(url));
+    }
+
+    public void setUrl(String url) {
+        this.urlProperty.set(url);
+    }
+
+    public String getUrl() {
+        return this.urlProperty.get();
+    }
+
+    public SimpleStringProperty urlProperty() {
+        return this.urlProperty;
+    }
+
     public ReadOnlyStringProperty getCurrentViewTitleProperty() {
         return currentTitle;
     }
 
     private void loadUrl(URL url) {
-        this.url = url;
+        setUrl(url.toString());
         load();
     }
 
@@ -102,8 +119,12 @@ public final class WebFXRegion extends AnchorPane {
 
         getChildren().clear();
 
-        defaultView = new WebFXView(navigationContext, this.cl);
-        defaultView.setURL(url);
+        defaultView = new WebFXView(navigationContext);
+        try {
+            defaultView.setURL(new URL(getUrl()));
+        } catch (MalformedURLException ex) {
+            Logger.getLogger(WebFXRegion.class.getName()).log(Level.SEVERE, null, ex);
+        }
         defaultView.setLocale(locale);
         defaultView.load();
 

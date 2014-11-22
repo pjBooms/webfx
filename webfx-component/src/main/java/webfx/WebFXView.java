@@ -39,7 +39,17 @@
  */
 package webfx;
 
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Locale;
+import java.util.ResourceBundle;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Platform;
+import javafx.beans.NamedArg;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -49,15 +59,8 @@ import javafx.geometry.NodeOrientation;
 import javafx.scene.Node;
 import javafx.scene.layout.AnchorPane;
 import javarestart.WebClassLoader;
-
-import javax.script.*;
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.net.URL;
-import java.util.Locale;
-import java.util.ResourceBundle;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import javax.script.ScriptEngine;
+import webfx.scripting.ScriptingInitializer;
 
 /**
  * {@literal WebFXView} is a {@link javafx.scene.Node} that manages an
@@ -78,6 +81,7 @@ public class WebFXView extends AnchorPane {
     private final SimpleObjectProperty<URL> urlProperty = new SimpleObjectProperty<>();
     private NavigationContext navigationContext;
     private final ReadOnlyStringProperty titleProperty = new SimpleStringProperty();
+    private final AtomicBoolean loaded = new AtomicBoolean(false);
 
     private WebClassLoader cl;
 
@@ -87,7 +91,11 @@ public class WebFXView extends AnchorPane {
         setFocusTraversable(true);
     }
 
-    public WebFXView(final URL url) {
+    public WebFXView(@NamedArg("url") String url) throws MalformedURLException {
+        this(new URL(url));
+    }
+
+    public WebFXView(URL url) {
         this();
         this.urlProperty.set(url);
         load();
@@ -118,10 +126,18 @@ public class WebFXView extends AnchorPane {
 
     public void setURL(URL url) {
         this.urlProperty.set(url);
+        load();
+    }
+
+    public SimpleObjectProperty<URL> urlProperty() {
+        return this.urlProperty;
     }
 
     public final void load() {
-        Platform.runLater(this::internalLoad);
+        if (loaded.get() == false) {
+            Platform.runLater(this::internalLoad);
+            loaded.set(true);
+        }
     }
 
     private void internalLoad() {
@@ -153,55 +169,22 @@ public class WebFXView extends AnchorPane {
             hackScriptEngine(fxmlLoader);
 
             if (scriptEngine != null) {
-                // dirty javascript initializer
-                ScriptEngineFactory seFactory = scriptEngine.getFactory();
-                LOGGER.log(Level.INFO, "ScriptEngine.LANGUAGE: {0}", seFactory.getLanguageName());
-                LOGGER.log(Level.INFO, "ScriptEngine.LANGUAGE_VERSION: {0}", seFactory.getLanguageVersion());
-                LOGGER.log(Level.INFO, "ScriptEngine.NAMES: {0}", seFactory.getNames());
-                LOGGER.log(Level.INFO, "ScriptEngine.ENGINE: {0}", seFactory.getEngineName());
-                LOGGER.log(Level.INFO, "ScriptEngine.ENGINE_VERSION: {0}", seFactory.getEngineVersion());
-                LOGGER.log(Level.INFO, "ScriptEngine.FILENAMES: {0}", seFactory.getExtensions());
-                LOGGER.log(Level.INFO, "ScriptEngine.toString: {0}", seFactory.toString());
-
-                Bindings wfxb = scriptEngine.getBindings(ScriptContext.GLOBAL_SCOPE);
-                wfxb.put("__webfx_i18n", resourceBundle);
-                wfxb.put("__webfx_navigation", navigationContext);
-                wfxb.put("__webfx_scene", getScene());
-
-                scriptEngine.eval("if (typeof $webfx === 'undefined') $webfx = {title:'Untitled'};");
-                scriptEngine.eval("$webfx.i18n = __webfx_i18n;");
-                scriptEngine.eval("$webfx.scene = __webfx_scene;");
-                scriptEngine.eval("$webfx.navigation = __webfx_navigation;");
-                scriptEngine.eval("if (typeof $webfx.initWebFX === 'function') $webfx.initWebFX();");
-
-                loadTitle();
-            } else {
-                String path = pageContext.getLocation().getFile();
-                int lastSlash = path.lastIndexOf('/');
-                Platform.runLater(() -> ((SimpleStringProperty) titleProperty).set(path.substring(lastSlash+1)));
+                ScriptingInitializer si = new ScriptingInitializer(scriptEngine, resourceBundle, navigationContext);
+                loadTitle(si.getPageTitle());
             }
-        } catch (IOException | ScriptException ex) {
+        } catch (MalformedURLException ex) {
+            Logger.getLogger(WebFXView.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
             Logger.getLogger(WebFXView.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
-    private void loadTitle() {
-        String title = "Untitled";
-        if (scriptEngine != null) {
-            try {
-                final Object objTitle = scriptEngine.eval("$webfx.title");
-                title = objTitle.toString();
+    private void loadTitle(String _title) {
+        String title = _title == null ? "Untitled" : _title;
 
-                LOGGER.log(Level.INFO, "Title found: {0}", title);
-
-                if (resourceBundle != null && title.startsWith("%")
-                    && resourceBundle.containsKey(title.substring(1))) {
-                    title = resourceBundle.getString(title.substring(1));
-                    LOGGER.log(Level.INFO, "Actual title: {0}", title);
-                }
-            } catch (final ScriptException ex) {
-                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-            }
+        if (resourceBundle != null && title.startsWith("%") && resourceBundle.containsKey(title.substring(1))) {
+            title = resourceBundle.getString(title.substring(1));
+            LOGGER.log(Level.INFO, "Actual title: {0}", title);
         }
 
         final String titleToSet = title;
