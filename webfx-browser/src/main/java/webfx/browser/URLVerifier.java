@@ -39,111 +39,29 @@
  */
 package webfx.browser;
 
-import webfx.JavaRestartURLHandler;
-import webfx.WebFXURLHandler;
-
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
- *
  * @author bruno
+ * @author nlipsky
  */
 public class URLVerifier {
 
-    private URL location;
-    private URL basePath;
-    private String pageName;
-    private boolean fxml;
-    private boolean javaRestart;
-    private boolean webFx;
-
-    public URLVerifier(String location) throws MalformedURLException {
-        if (location.startsWith(JavaRestartURLHandler.JAVA_PROTOCOL)) {
-            javaRestart = true;
-            location = JavaRestartURLHandler.convertToHttp(location);
-        } else if (location.startsWith(WebFXURLHandler.WEB_FX_PROTOCOL)) {
-            webFx = true;
-            location = WebFXURLHandler.convertToHttp(location);
-        }
+    public static URL verifyURL(String location) throws MalformedURLException {
+        URL url;
         try {
-            this.location = new URL(location);
+            url = new URL(location);
         } catch (MalformedURLException e) {
             File f = new File(location.trim());
             if (f.isAbsolute() && f.exists()) {
-                this.location = f.toURI().toURL();
+                url = f.toURI().toURL();
             } else {
-                this.location = new URL("http://" + location);
+                url = new URL("http://" + location);
             }
         }
-        this.basePath = extractBasePath();
-    }
-
-    public URLVerifier(URL location) {
-        this.location = location;
-        this.basePath = extractBasePath();
-    }
-
-    private URL extractBasePath() {
-        int lastSlash = location.getPath().lastIndexOf('/');
-
-        if (lastSlash == -1) {
-            pageName = "index";
-            return location;
-        }
-
-        String file = location.getPath();
-        String path = file.substring(0, lastSlash);
-        URL base = null;
-
-        try {
-            base = new URL(location.getProtocol(), location.getHost(), location.getPort(), path);
-        } catch (MalformedURLException ex) {
-            Logger.getLogger(URLVerifier.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        pageName = file.substring(lastSlash + 1);
-        int indexOfExtension = pageName.indexOf('.');
-        if (indexOfExtension != 1) {
-            String extension = file.substring(file.lastIndexOf('.') + 1);
-
-            if ("fxml".equals(extension)) {
-                fxml = true;
-                pageName = pageName.substring(0, indexOfExtension);
-            }
-        }
-
-        return base;
-    }
-
-    public URL getBasePath() {
-        return basePath;
-    }
-
-    public URL getLocation() {
-        return location;
-    }
-
-    /**
-     * @return the pageName
-     */
-    public String getPageName() {
-        return pageName;
-    }
-
-    public boolean isFxml() {
-        return fxml;
-    }
-
-    public boolean isJavaRestart() {
-        return javaRestart;
-    }
-
-    public boolean isWebFX() {
-        return webFx;
+        return url;
     }
 
 }

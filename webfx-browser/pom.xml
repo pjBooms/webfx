@@ -28,12 +28,6 @@
             <groupId>webfx</groupId>
             <artifactId>webfx-component</artifactId>
         </dependency>
-
-        <dependency>
-            <groupId>javarestart</groupId>
-            <artifactId>javarestart-client</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
     </dependencies>
 
     <build>

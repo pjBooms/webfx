@@ -54,7 +54,6 @@ import org.w3c.dom.events.Event;
 import org.w3c.dom.events.EventListener;
 import org.w3c.dom.events.EventTarget;
 import org.w3c.dom.html.HTMLAnchorElement;
-import webfx.JavaRestartURLHandler;
 import webfx.NavigationContext;
 
 import java.net.MalformedURLException;
@@ -171,13 +170,11 @@ public class HTMLTab implements BrowserTab {
                 webEngine.load(location);
             }
 
-            public void launch(String location) {
-                try {
-                    JavaRestartURLHandler.launch(location,
-                            new URLVerifier(webEngine.getLocation()).getBasePath().toExternalForm());
-                } catch (MalformedURLException e) {
-                }
+            @Override
+            public void goTo(String protocol, String relPath) {
+                throw new RuntimeException("should not be called");
             }
+
         };
     }
 

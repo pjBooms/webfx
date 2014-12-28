@@ -44,7 +44,10 @@ import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Node;
-import javarestart.WebClassLoader;
+import webfx.WebFXURLProcessor;
+import webfx.browser.urlhandlers.URLHandler;
+import webfx.browser.urlhandlers.URLHandlersRegistry;
+import webfx.browser.urlhandlers.WebFXURLHandler;
 import webfx.NavigationContext;
 import webfx.WebFXRegion;
 
@@ -66,13 +69,18 @@ public class FXTab implements BrowserTab {
         contentProperty.set(webfx);
     }
 
-    FXTab(Locale locale) {
-        this(locale, null);
-
-    }
-
-    FXTab(final Locale locale, final WebClassLoader cl) {
-        webfx = new WebFXRegion(cl);
+    public FXTab(final Locale locale) {
+        webfx = new WebFXRegion(url -> {
+            URLHandler handler = URLHandlersRegistry.getHandler(url);
+            if (handler != null) {
+                if (handler instanceof WebFXURLHandler) {
+                    return new WebFXURLProcessor.Result(true, ((WebFXURLHandler) handler).getClassLoader(url));
+                } else {
+                    handler.handle(url, locale);
+                }
+            }
+            return new WebFXURLProcessor.Result(false, null);
+        });
         contentProperty.set(webfx);
         webfx.setLocale(locale);
     }

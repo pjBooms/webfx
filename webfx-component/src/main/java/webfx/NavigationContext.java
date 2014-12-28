@@ -55,8 +55,8 @@ public interface NavigationContext {
 
     public void goTo(String url);
 
-    public void launch(String url);
-    
+    public void goTo(String protocol, String relPath);
+
     public void reload();
 
 }

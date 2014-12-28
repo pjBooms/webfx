@@ -66,9 +66,9 @@ import javafx.scene.image.ImageView;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import webfx.browser.settings.SettingsController;
+import webfx.browser.urlhandlers.URLHandler;
+import webfx.browser.urlhandlers.URLHandlersRegistry;
 import webfx.browser.util.FXUtil;
-import javarestart.WebClassLoader;
-import webfx.JavaRestartURLHandler;
 
 /**
  *
@@ -78,7 +78,7 @@ public class BrowserFXController implements TabManager {
 
     private static final Logger LOGGER = Logger.getLogger(BrowserFXController.class.getName());
     private static final String HOME_PAGE = "http://javarestart.com";
-//    private static final String HOME_PAGE = "localhost:8080";
+//    private static final String HOME_PAGE = "http://localhost:8080";
 
     /**
      * Components
@@ -174,53 +174,27 @@ public class BrowserFXController implements TabManager {
     }
 
     public void openPage(String location) {
-        URLVerifier urlVerifier = null;
-
+        URL url;
         try {
-            urlVerifier = new URLVerifier(location);
+            url = URLVerifier.verifyURL(location);
         } catch (MalformedURLException ex) {
             Logger.getLogger(BrowserFXController.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        if (urlVerifier == null) {
             return;
         }
 
-        final URL url = urlVerifier.getLocation();
-        if (urlVerifier.isJavaRestart()) {
-            JavaRestartURLHandler.launch(url);
-            return;
-        }
-        final boolean isFxml = urlVerifier.isFxml();
-        final boolean isWebFx = urlVerifier.isWebFX();
-
+        URLHandler urlHandler = URLHandlersRegistry.getHandler(url);
         Platform.runLater(() -> {
-            BrowserTab browserTab;
-            if (isFxml) {
-                browserTab = new FXTab(locale);
-                browserTab.getNavigationContext().goTo(url);
-            } else if (isWebFx) {
-                try {
-                    final WebClassLoader webClassloader = new WebClassLoader(url);
-                    browserTab = new FXTab(locale, webClassloader);
-                    browserTab.getNavigationContext().goTo(webClassloader.getFxml());
-                } catch (final IOException e) {
-
-                    throw new IllegalStateException(e);
+            BrowserTab browserTab = urlHandler.handle(url, locale);
+            if (browserTab != null) {
+                browserTab.setTabManager(this);
+                selectionTab.getSelectedItem().contentProperty().bind(browserTab.contentProperty());
+                browserMap.put(selectionTab.getSelectedIndex(), browserTab);
+                if(!urlField.isFocused()){
+                    urlField.textProperty().bind(browserTab.locationProperty());
                 }
-            } else {
-                browserTab = new HTMLTab();
-                browserTab.getNavigationContext().goTo(url);
+                stopButton.disableProperty().set(!browserTab.isStoppable());
+                selectionTab.getSelectedItem().textProperty().bind(browserTab.titleProperty());
             }
-
-            browserTab.setTabManager(this);
-            selectionTab.getSelectedItem().contentProperty().bind(browserTab.contentProperty());
-            browserMap.put(selectionTab.getSelectedIndex(), browserTab);
-            if(!urlField.isFocused()){
-                urlField.textProperty().bind(browserTab.locationProperty());
-            }
-            stopButton.disableProperty().set(!browserTab.isStoppable());
-            selectionTab.getSelectedItem().textProperty().bind(browserTab.titleProperty());
         });
     }
 

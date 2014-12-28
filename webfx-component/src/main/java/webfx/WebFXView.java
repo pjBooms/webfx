@@ -58,8 +58,9 @@ import javafx.fxml.FXMLLoader;
 import javafx.geometry.NodeOrientation;
 import javafx.scene.Node;
 import javafx.scene.layout.AnchorPane;
-import javarestart.WebClassLoader;
+
 import javax.script.ScriptEngine;
+
 import webfx.scripting.ScriptingInitializer;
 
 /**
@@ -87,7 +88,7 @@ public class WebFXView extends AnchorPane {
     private final ReadOnlyStringProperty titleProperty = new SimpleStringProperty();
     private final AtomicBoolean loaded = new AtomicBoolean(false);
 
-    private WebClassLoader cl;
+    private ClassLoader cl;
 
     public WebFXView() {
         setNodeOrientation(NodeOrientation.LEFT_TO_RIGHT);
@@ -105,7 +106,7 @@ public class WebFXView extends AnchorPane {
         load();
     }
 
-    WebFXView(NavigationContext navigationContext, WebClassLoader cl) {
+    WebFXView(NavigationContext navigationContext, ClassLoader cl) {
         this();
         this.navigationContext = navigationContext;
         this.cl = cl;

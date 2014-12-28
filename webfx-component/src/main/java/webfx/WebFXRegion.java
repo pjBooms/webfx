@@ -39,13 +39,10 @@
  */
 package webfx;
 
-import javarestart.WebClassLoader;
-
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
@@ -66,20 +63,17 @@ public final class WebFXRegion extends AnchorPane {
     private final NavigationContext navigationContext;
     private final ReadOnlyStringProperty currentTitle = new SimpleStringProperty();
     private Locale locale;
-    private WebClassLoader cl = null;
-
-    private static HashMap<URL, WebClassLoader> classloaders = new HashMap<>();
+    private ClassLoader cl = null;
+    private WebFXURLProcessor urlProcessor;
 
     public WebFXRegion() {
         navigationContext = new NavigationContextImpl();
     }
 
-    public WebFXRegion(final WebClassLoader cl) {
+
+    public WebFXRegion(final WebFXURLProcessor urlProcessor) {
         this();
-        this.cl = cl;
-        if (cl != null) {
-            classloaders.put(cl.getBaseURL(), cl);
-        }
+        this.urlProcessor = urlProcessor;
     }
 
     public WebFXRegion(URL url) {
@@ -151,9 +145,9 @@ public final class WebFXRegion extends AnchorPane {
 
         private class HistoryEntry {
             URL url;
-            WebClassLoader cl;
+            ClassLoader cl;
 
-            private HistoryEntry(URL url, WebClassLoader cl) {
+            private HistoryEntry(URL url, ClassLoader cl) {
                 this.url = url;
                 this.cl = cl;
             }
@@ -205,6 +199,20 @@ public final class WebFXRegion extends AnchorPane {
 
         @Override
         public void goTo(URL url) {
+            if (urlProcessor != null) {
+                WebFXURLProcessor.Result procRes = urlProcessor.process(url);
+                if (procRes.loadContent) {
+                    try {
+                        //resolve destination
+                        url = url.openConnection().getURL();
+                    } catch (IOException e) {
+                    }
+                    cl = procRes.classLoader;
+                }else {
+                    return;
+                }
+            }
+
             loadUrl(url, true);
         }
 
@@ -213,56 +221,9 @@ public final class WebFXRegion extends AnchorPane {
             if (pageContext == null) return null;
 
             URL context = pageContext.getLocation();
-            //TODO: if base path contains ?resource in query we should append the resource to the path.
             URL destination = null;
             try {
                 destination = new URL(context, relPath);
-
-                if ((cl != null) && destination.toString().startsWith(cl.getBaseURL().toString())) {
-                    //the resource within the same classloader
-                    if (destination.sameFile(cl.getBaseURL())) {
-                        //we need to resolve main FXMl again
-                        destination = cl.getFxml();
-                    }
-                } else {
-                    String appsURL = (cl == null? new URL(context, "/apps") : new URL(cl.getBaseURL(), ".")).toString();
-                    if (destination.toString().startsWith(appsURL)) {
-                        //the resource in some other classloader
-                        String destRest = destination.toString().substring(appsURL.length());
-                        if (!destRest.isEmpty()) {
-                            if (destRest.charAt(0) == '/') {
-                                destRest = destRest.substring(1);
-                            }
-                            if (!destRest.isEmpty()) {
-                                int slashPos = destRest.indexOf('/');
-                                String newApp;
-                                if (slashPos >= 0) {
-                                    newApp = destRest.substring(0, slashPos);
-                                } else {
-                                    newApp = destRest;
-                                }
-                                URL newAppURL = new URL(appsURL + '/' + newApp);
-                                if (classloaders.containsKey(newAppURL)) {
-                                    cl = classloaders.get(newAppURL);
-                                } else {
-                                    try {
-                                        cl = new WebClassLoader(newAppURL);
-                                        classloaders.put(newAppURL, cl);
-                                    } catch (IOException e) {
-                                        //failed to obtain new classloader
-                                        return destination;
-                                    }
-                                }
-                                if (newApp == destRest) {
-                                    //fetch main fxml as well
-                                    destination = cl.getFxml();
-                                }
-                            }
-                        }
-                    } else {
-                        // TODO: if app resides on some other path, we should try to find it
-                    }
-                }
             } catch (MalformedURLException ex) {
                 Logger.getLogger(WebFXView.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -271,24 +232,19 @@ public final class WebFXRegion extends AnchorPane {
 
         @Override
         public void goTo(String url) {
-            URL destination = null;
-            if (url.startsWith("file:/") || url.startsWith("jar:/") || url.startsWith("wfx:/") || url.startsWith("http:/") || url.startsWith("https:/")) {
-                try {
-                    destination = new URL(url);
-                } catch (MalformedURLException ex) {
-                    Logger.getLogger(WebFXView.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            } else {
-                destination = resolveDestination(url);
-            }
-
-            goTo(destination);
+            goTo(resolveDestination(url));
         }
 
         @Override
-        public void launch(String location) {
-            JavaRestartURLHandler.launch(location,
-                    defaultView.getPageContext().getBasePath().toExternalForm());
+        public void goTo(String protocol, String relPath) {
+            URL url = resolveDestination(relPath);
+            try {
+                url = url.getProtocol().equals(protocol)? url : new URL(protocol, url.getHost(), url.getPort(), url.getFile());
+            } catch (MalformedURLException e) {
+                Logger.getLogger(WebFXView.class.getName()).log(Level.SEVERE, null, e);
+                return;
+            }
+            goTo(url);
         }
 
         @Override

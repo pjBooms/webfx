@@ -10,8 +10,15 @@ The purpose of this project is to investigate the capabilities of using JavaFX (
 
 Java ReStart integration
 =====
-It is forked version and it depends on Java ReStart project -- https://github.com/pjBooms/Java-ReStart.
-So please clone it first, build with Maven (launch "mvn install" from the root of that project), and after that you should be able to build WebFX.
+It is forked version that introduces URL handlers concept
+where two URL Handlers for ``java://`` and ``wfx://`` protocols are defined in
+https://github.com/pjBooms/Java-ReStart project under javarestart-webfx module.
+To enable the implementation you need to clone Java ReStart project, build it
+(it depends on this fork, so you have to call
+``mvn -install`` before building Java ReStart)
+and launch the WebFX browser from javarestart-webfx module with the following VM properties:
+
+``-Djava.protocol.handler.pkgs=javarestart.webfx.protocols -Dwebfx.url.handlers=javarestart.webfx.JavaURLHandler,javarestart.webfx.WFXURLHandler``
 
 The integration allows you to reference remote classes from FXML pages
 (originally only JS could be referenced from FXML) and launch Java ReStart applications from the WebFX browser
