@@ -1,7 +1,7 @@
 package webfx.browser.urlhandlers;
 
 import webfx.browser.BrowserTab;
-import webfx.browser.FXTab;
+import webfx.browser.tabs.FXTab;
 
 import java.net.URL;
 import java.util.Locale;

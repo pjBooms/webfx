@@ -37,7 +37,7 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package webfx.browser;
+package webfx.browser.tabs;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyStringProperty;
@@ -50,6 +50,8 @@ import webfx.browser.urlhandlers.URLHandlersRegistry;
 import webfx.browser.urlhandlers.WebFXURLHandler;
 import webfx.NavigationContext;
 import webfx.WebFXRegion;
+import webfx.browser.BrowserTab;
+import webfx.browser.TabManager;
 
 import java.util.Locale;
 
@@ -57,19 +59,21 @@ import java.util.Locale;
  *
  * @author Bruno Borges <bruno.borges at oracle.com>
  */
-public class FXTab implements BrowserTab {
+class FXTab extends BrowserTab {
 
     private final ReadOnlyStringWrapper locationProperty = new ReadOnlyStringWrapper();
     private final SimpleObjectProperty<Node> contentProperty = new SimpleObjectProperty<>();
     private final WebFXRegion webfx;
-    private TabManager tabManager;
 
-    public FXTab() {
-        webfx = new WebFXRegion();
-        contentProperty.set(webfx);
+    private static final String[] CONTENT_TYPES = {"text/x-fxml+xml", "text/x-fxml", "application/fxml", "application/xml"};
+    private static final String[] FILE_EXTENSIONS = {"fxml"};
+
+    public static void register() {
+        TabFactory.registerProvider(FXTab::new, FILE_EXTENSIONS, CONTENT_TYPES);
     }
 
-    public FXTab(final Locale locale) {
+    public FXTab(TabManager tabManager, Locale locale) {
+        super(tabManager);
         webfx = new WebFXRegion(url -> {
             URLHandler handler = URLHandlersRegistry.getHandler(url);
             if (handler != null) {
@@ -106,11 +110,6 @@ public class FXTab implements BrowserTab {
     }
 
     @Override
-    public void setTabManager(TabManager tm) {
-        this.tabManager = tm;
-    }
-
-    @Override
     public NavigationContext getNavigationContext() {
         return webfx.getNavigationContext();
     }
@@ -118,6 +117,16 @@ public class FXTab implements BrowserTab {
     @Override
     public boolean isStoppable() {
         return false;
+    }
+
+    @Override
+    public String[] getFileExtensions() {
+        return CONTENT_TYPES;
+    }
+
+    @Override
+    public String[] getContentTypes() {
+        return FILE_EXTENSIONS;
     }
 
 }

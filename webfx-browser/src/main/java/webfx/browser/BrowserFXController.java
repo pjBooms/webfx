@@ -66,8 +66,6 @@ import javafx.scene.image.ImageView;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import webfx.browser.settings.SettingsController;
-import webfx.browser.urlhandlers.URLHandler;
-import webfx.browser.urlhandlers.URLHandlersRegistry;
 import webfx.browser.util.FXUtil;
 
 /**
@@ -122,14 +120,14 @@ public class BrowserFXController implements TabManager {
         selectionTab.selectLast();
         focusAddressBar();
     }
-    
-    void focusAddressBar(){
+
+    void focusAddressBar() {
         urlField.requestFocus();
     }
-    
-    public void openNetworkSettings(){
+
+    public void openNetworkSettings() {
         final FXMLLoader settings = FXUtil.load(SettingsController.class);
-        try{
+        try {
             final Node node = settings.load();
             final SettingsController controller = settings.getController();
             final Stage stage = new Stage();

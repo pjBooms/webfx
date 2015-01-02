@@ -166,7 +166,7 @@ public class WebFXView extends AnchorPane {
             curContext.set(pageContext);
 
             fxmlLoader = new FXMLLoader(pageContext.getLocation(), resourceBundle);
-            final Node loadedNode = fxmlLoader.load();
+            Node loadedNode = fxmlLoader.load();
 
             if (cl != null) {
                 Thread.currentThread().setContextClassLoader(oldClassloader);
