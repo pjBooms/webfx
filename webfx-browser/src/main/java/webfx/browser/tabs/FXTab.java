@@ -80,7 +80,7 @@ class FXTab extends BrowserTab {
                 if (handler instanceof WebFXURLHandler) {
                     return new WebFXURLProcessor.Result(true, ((WebFXURLHandler) handler).getClassLoader(url));
                 } else {
-                    handler.handle(url, locale);
+                    handler.handle(url, tabManager, locale);
                 }
             }
             return new WebFXURLProcessor.Result(false, null);

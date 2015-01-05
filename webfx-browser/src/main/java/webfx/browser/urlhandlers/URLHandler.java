@@ -1,6 +1,8 @@
 package webfx.browser.urlhandlers;
 
+import webfx.WebFXURLProcessor;
 import webfx.browser.BrowserTab;
+import webfx.browser.TabManager;
 
 import java.net.URL;
 import java.util.Locale;
@@ -21,14 +23,17 @@ public interface URLHandler {
      */
     String[] getProtocols();
 
+    WebFXURLProcessor getURLProcessor();
+
     /**
      * Handles specified URL.
      *
      * @param url specified URL to handle
+     * @param tabManager required for resulting browser tab construction
      * @param locale preferred locale that should be used to render the content.
      * @return browser tab of the rendered content of the specified url or
      *         {@code null}, if no browser tab is required to show the content.
      */
-    BrowserTab handle(URL url, Locale locale);
+    BrowserTab handle(URL url, TabManager tabManager, Locale locale);
 
 }

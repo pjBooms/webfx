@@ -1,7 +1,8 @@
 package webfx.browser.urlhandlers;
 
 import webfx.browser.BrowserTab;
-import webfx.browser.tabs.FXTab;
+import webfx.browser.TabManager;
+import webfx.browser.tabs.TabFactory;
 
 import java.net.URL;
 import java.util.Locale;
@@ -24,8 +25,8 @@ public abstract class WebFXURLHandler implements URLHandler {
     public abstract ClassLoader getClassLoader(URL url);
 
     @Override
-    public BrowserTab handle(URL url, Locale locale) {
-        BrowserTab browserTab = new FXTab(locale);
+    public BrowserTab handle(URL url, TabManager tabManager, Locale locale) {
+        BrowserTab browserTab = TabFactory.newTab(tabManager, locale, "fxml", null);
         browserTab.getNavigationContext().goTo(url);
         return browserTab;
     }

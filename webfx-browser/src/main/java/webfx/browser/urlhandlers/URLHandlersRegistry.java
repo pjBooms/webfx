@@ -39,8 +39,11 @@
  */
 package webfx.browser.urlhandlers;
 
+import webfx.WebFXURLProcessor;
 import webfx.browser.BrowserTab;
-import webfx.browser.HTMLTab;
+import webfx.browser.TabManager;
+import webfx.browser.URLVerifier;
+import webfx.browser.tabs.TabFactory;
 
 import java.net.URL;
 import java.util.HashMap;
@@ -50,7 +53,7 @@ import java.util.logging.Logger;
 
 /**
  * The registry of URL handlers.
- * There are severa<></>l predefined URL handlers for usual protocols like {@code http://}.
+ * There are several predefined URL handlers for usual protocols like {@code http://}.
  * You may define your own URL handlers via {@code -Dwebfx.url.handlers=handler1,handler2}
  * VM property that defines the list of classes of URL handlers to register in the registry.
  *
@@ -79,9 +82,19 @@ public class URLHandlersRegistry {
             }
 
             @Override
-            public BrowserTab handle(URL url, Locale locale) {
-                BrowserTab browserTab = new HTMLTab();
-                browserTab.getNavigationContext().goTo(url);
+            public WebFXURLProcessor getURLProcessor() {
+                return url -> {
+                    return null;
+                };
+            }
+
+            @Override
+            public BrowserTab handle(URL url, TabManager tabManager, Locale locale) {
+                URLVerifier urlVerifier = new URLVerifier(url);
+                String fileExtension = urlVerifier.getFileExtension().orElse(null);
+                String contentType = urlVerifier.getContentType().orElse(null);
+                BrowserTab browserTab = TabFactory.newTab(tabManager, locale, fileExtension, contentType);
+                browserTab.getNavigationContext().goTo(urlVerifier.getLocation());
                 return browserTab;
             }
         });
@@ -101,20 +114,6 @@ public class URLHandlersRegistry {
 
 
     public static URLHandler getHandler(URL url) {
-        if (url.getFile().endsWith(".fxml")) {
-            return new WebFXURLHandler() {
-                @Override
-                public ClassLoader getClassLoader(URL url) {
-                    return null;
-                }
-
-                @Override
-                public String[] getProtocols() {
-                    return null;
-                }
-            };
-        } else {
-            return handlers.get(url.getProtocol());
-        }
+        return handlers.get(url.getProtocol());
     }
 }
