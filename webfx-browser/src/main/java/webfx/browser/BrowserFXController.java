@@ -65,9 +65,12 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import webfx.URLVerifier;
 import webfx.browser.settings.SettingsController;
-import webfx.browser.urlhandlers.URLHandler;
-import webfx.browser.urlhandlers.URLHandlersRegistry;
+import webfx.browser.tabs.TabFactory;
+import webfx.contentdescriptors.ContentDescriptor;
+import webfx.urlhandlers.URLHandler;
+import webfx.urlhandlers.URLHandlersRegistry;
 import webfx.browser.util.FXUtil;
 
 /**
@@ -183,9 +186,14 @@ public class BrowserFXController implements TabManager {
         }
 
         URLHandler urlHandler = URLHandlersRegistry.getHandler(url);
+        if (urlHandler == null) {
+            return;
+        }
         Platform.runLater(() -> {
-            BrowserTab browserTab = urlHandler.handle(url, this, locale);
-            if (browserTab != null) {
+            URLHandler.Result handleResult = urlHandler.handle(url);
+            if (handleResult.contentDescriptor != ContentDescriptor.NoContent.instance()) {
+                BrowserTab browserTab = TabFactory.newTab(this, locale, handleResult.contentDescriptor);
+                browserTab.getNavigationContext().goTo(url);
                 selectionTab.getSelectedItem().contentProperty().bind(browserTab.contentProperty());
                 browserMap.put(selectionTab.getSelectedIndex(), browserTab);
                 if(!urlField.isFocused()){

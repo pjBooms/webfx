@@ -37,23 +37,19 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package webfx.browser.urlhandlers;
+package webfx.urlhandlers;
 
-import webfx.WebFXURLProcessor;
-import webfx.browser.BrowserTab;
-import webfx.browser.TabManager;
-import webfx.browser.URLVerifier;
-import webfx.browser.tabs.TabFactory;
+import webfx.URLVerifier;
+import webfx.contentdescriptors.ContentDescriptorsRegistry;
 
 import java.net.URL;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  * The registry of URL handlers.
- * There are several predefined URL handlers for usual protocols like {@code http://}.
+ * There is a predefined URL handler for usual protocols like {@code http://}.
  * You may define your own URL handlers via {@code -Dwebfx.url.handlers=handler1,handler2}
  * VM property that defines the list of classes of URL handlers to register in the registry.
  *
@@ -82,20 +78,11 @@ public class URLHandlersRegistry {
             }
 
             @Override
-            public WebFXURLProcessor getURLProcessor() {
-                return url -> {
-                    return null;
-                };
-            }
-
-            @Override
-            public BrowserTab handle(URL url, TabManager tabManager, Locale locale) {
+            public Result handle(URL url) {
                 URLVerifier urlVerifier = new URLVerifier(url);
                 String fileExtension = urlVerifier.getFileExtension().orElse(null);
                 String contentType = urlVerifier.getContentType().orElse(null);
-                BrowserTab browserTab = TabFactory.newTab(tabManager, locale, fileExtension, contentType);
-                browserTab.getNavigationContext().goTo(urlVerifier.getLocation());
-                return browserTab;
+                return new Result(ContentDescriptorsRegistry.getContentDescriptor(fileExtension, contentType), null);
             }
         });
 

@@ -51,6 +51,9 @@ import javafx.beans.NamedArg;
 import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.layout.AnchorPane;
+import webfx.contentdescriptors.ContentDescriptor;
+import webfx.urlhandlers.URLHandler;
+import webfx.urlhandlers.URLHandlersRegistry;
 
 /**
  *
@@ -64,16 +67,9 @@ public final class WebFXRegion extends AnchorPane {
     private final ReadOnlyStringProperty currentTitle = new SimpleStringProperty();
     private Locale locale;
     private ClassLoader cl = null;
-    private WebFXURLProcessor urlProcessor;
 
     public WebFXRegion() {
         navigationContext = new NavigationContextImpl();
-    }
-
-
-    public WebFXRegion(final WebFXURLProcessor urlProcessor) {
-        this();
-        this.urlProcessor = urlProcessor;
     }
 
     public WebFXRegion(URL url) {
@@ -199,20 +195,21 @@ public final class WebFXRegion extends AnchorPane {
 
         @Override
         public void goTo(URL url) {
-            if (urlProcessor != null) {
-                WebFXURLProcessor.Result procRes = urlProcessor.process(url);
-                if (procRes.loadContent) {
+            URLHandler urlHandler = URLHandlersRegistry.getHandler(url);
+            if (urlHandler != null) {
+                URLHandler.Result handleResult = urlHandler.handle(url);
+                if (handleResult.contentDescriptor == ContentDescriptor.FXML.instance()) {
                     try {
                         //resolve destination
                         url = url.openConnection().getURL();
                     } catch (IOException e) {
                     }
-                    cl = procRes.classLoader;
-                }else {
+                    cl = handleResult.classLoader;
+                } else {
+                    //cannot render non FXML content
                     return;
                 }
             }
-
             loadUrl(url, true);
         }
 

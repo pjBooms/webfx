@@ -44,14 +44,11 @@ import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Node;
-import webfx.WebFXURLProcessor;
-import webfx.browser.urlhandlers.URLHandler;
-import webfx.browser.urlhandlers.URLHandlersRegistry;
-import webfx.browser.urlhandlers.WebFXURLHandler;
 import webfx.NavigationContext;
 import webfx.WebFXRegion;
 import webfx.browser.BrowserTab;
 import webfx.browser.TabManager;
+import webfx.contentdescriptors.ContentDescriptor;
 
 import java.util.Locale;
 
@@ -65,26 +62,13 @@ class FXTab extends BrowserTab {
     private final SimpleObjectProperty<Node> contentProperty = new SimpleObjectProperty<>();
     private final WebFXRegion webfx;
 
-    private static final String[] CONTENT_TYPES = {"text/x-fxml+xml", "text/x-fxml", "application/fxml", "application/xml"};
-    private static final String[] FILE_EXTENSIONS = {"fxml"};
-
     public static void register() {
-        TabFactory.registerProvider(FXTab::new, FILE_EXTENSIONS, CONTENT_TYPES);
+        TabFactory.registerProvider(FXTab::new, ContentDescriptor.FXML.instance());
     }
 
     public FXTab(TabManager tabManager, Locale locale) {
         super(tabManager);
-        webfx = new WebFXRegion(url -> {
-            URLHandler handler = URLHandlersRegistry.getHandler(url);
-            if (handler != null) {
-                if (handler instanceof WebFXURLHandler) {
-                    return new WebFXURLProcessor.Result(true, ((WebFXURLHandler) handler).getClassLoader(url));
-                } else {
-                    handler.handle(url, tabManager, locale);
-                }
-            }
-            return new WebFXURLProcessor.Result(false, null);
-        });
+        webfx = new WebFXRegion();
         contentProperty.set(webfx);
         webfx.setLocale(locale);
     }
@@ -120,13 +104,8 @@ class FXTab extends BrowserTab {
     }
 
     @Override
-    public String[] getFileExtensions() {
-        return CONTENT_TYPES;
-    }
-
-    @Override
-    public String[] getContentTypes() {
-        return FILE_EXTENSIONS;
+    public ContentDescriptor getContentDescripor() {
+        return ContentDescriptor.FXML.instance();
     }
 
 }
