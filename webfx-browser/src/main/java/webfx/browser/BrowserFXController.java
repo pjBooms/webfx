@@ -177,7 +177,7 @@ public class BrowserFXController implements TabManager {
     }
 
     public void openPage(String location) {
-        URL url;
+        final URL url;
         try {
             url = URLVerifier.verifyURL(location);
         } catch (MalformedURLException ex) {

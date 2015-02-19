@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
+ * @author Bruno Borges <bruno.borges at oracle.com>
  * @author Nikita Lipsky
  */
 public class ContentDescriptorsRegistry {

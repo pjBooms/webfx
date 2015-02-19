@@ -219,7 +219,7 @@ public class WebFXView extends AnchorPane {
      *
      * @param loader
      */
-    private void hackScriptEngine(final FXMLLoader loader) {
+    private void hackScriptEngine(FXMLLoader loader) {
         try {
             Field fse = loader.getClass().getDeclaredField("scriptEngine");
             fse.setAccessible(true);
@@ -230,7 +230,7 @@ public class WebFXView extends AnchorPane {
     }
 
     private void initLocalization() {
-        final ResourceBundleLoader rbl = new ResourceBundleLoader(pageContext, locale);
+        ResourceBundleLoader rbl = new ResourceBundleLoader(pageContext, locale);
         resourceBundle = rbl.findBundle();
     }
 }

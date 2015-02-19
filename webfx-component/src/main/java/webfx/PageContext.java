@@ -54,7 +54,7 @@ public class PageContext {
     private URL basePath;
     private String pageName;
 
-    public PageContext(final URL location) {
+    public PageContext(URL location) {
         this.location = location;
         extractBasePath();
     }
@@ -64,30 +64,28 @@ public class PageContext {
             return;
         }
 
-        final int lastSlash = location.getPath().lastIndexOf('/');
+        int lastSlash = location.getPath().lastIndexOf('/');
 
         if (lastSlash == -1) {
             pageName = "index";
             basePath = location;
         }
 
-        final String file = location.getPath();
-        final String path = (lastSlash == -1)
-                ? ""
-                : file.substring(0, lastSlash)
-                ;
+        String file = location.getPath();
+        String path = (lastSlash == -1) ? "" : file.substring(0, lastSlash);
 
         URL base = null;
+
         try {
             base = new URL(location.getProtocol(), location.getHost(), location.getPort(), path);
-        } catch (final MalformedURLException ex) {
+        } catch (MalformedURLException ex) {
             Logger.getLogger(PageContext.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         pageName = file.substring(lastSlash + 1);
-        final int indexOfExtension = pageName.indexOf('.');
+        int indexOfExtension = pageName.indexOf('.');
         if (indexOfExtension != 1) {
-            final String extension = file.substring(file.lastIndexOf('.') + 1);
+            String extension = file.substring(file.lastIndexOf('.') + 1);
 
             if ("fxml".equals(extension)) {
                 pageName = pageName.substring(0, indexOfExtension);

@@ -1,6 +1,8 @@
 package webfx.contentdescriptors;
 
 /**
+ * Describes the content to be rendered by a tab.
+ *
  * @author Nikita Lipsky
  */
 public interface ContentDescriptor {
@@ -9,8 +11,11 @@ public interface ContentDescriptor {
 
     String[] getContentTypes();
 
+    /**
+     * HTML content descriptor singleton.
+     */
     public class HTML implements ContentDescriptor {
-        private HTML(){};
+        private HTML(){}
 
         private static final HTML INSTANCE = new HTML();
         private static final String[] CONTENT_TYPES = new String[]{"text/html", "text/xhtml"};
@@ -35,8 +40,11 @@ public interface ContentDescriptor {
         }
     }
 
+    /**
+     * FXML content descriptor singleton.
+     */
     public class FXML implements ContentDescriptor {
-        private FXML(){};
+        private FXML(){}
         private static final FXML INSTANCE = new FXML();
         private static final String[] CONTENT_TYPES = {"text/x-fxml+xml", "text/x-fxml", "application/fxml", "application/xml"};
         private static final String[] FILE_EXTENSIONS = {"fxml"};
@@ -60,8 +68,11 @@ public interface ContentDescriptor {
         }
     }
 
+    /**
+     * AsciiDoc content descriptor singleton.
+     */
     public class AsciiDoc implements ContentDescriptor {
-        private AsciiDoc(){};
+        private AsciiDoc(){}
         private static final AsciiDoc INSTANCE = new AsciiDoc();
         private static final String[] CONTENT_TYPES = new String[]{"text/x-asciidoc", "text/asciidoc", "application/asciidoc"};
         private static final String[] FILE_EXTENSIONS = new String[]{"asciidoc", "adoc"};
@@ -85,8 +96,11 @@ public interface ContentDescriptor {
         }
     }
 
+    /**
+     * No content descriptor singleton.
+     */
     public class NoContent implements ContentDescriptor {
-        private NoContent(){};
+        private NoContent(){}
         private static final NoContent INSTANCE = new NoContent();
 
         @Override

@@ -64,11 +64,6 @@ import webfx.browser.BrowserTab;
 import webfx.browser.TabManager;
 import webfx.contentdescriptors.ContentDescriptor;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 /**
  *
  * @author bruno
