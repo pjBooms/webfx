@@ -18,7 +18,7 @@ To enable the implementation you need to clone Java ReStart project, build it
 ``mvn -install`` before building Java ReStart)
 and launch the WebFX browser from javarestart-webfx module with the following VM properties:
 
-``-Djava.protocol.handler.pkgs=javarestart.webfx.protocols -Dwebfx.url.handlers=javarestart.webfx.JavaURLHandler,javarestart.webfx.WFXURLHandler``
+``-Djava.protocol.handler.pkgs=javarestart.protocols -Dwebfx.url.handlers=javarestart.webfx.JavaURLHandler,javarestart.webfx.WFXURLHandler``
 
 The integration allows you to reference remote classes from FXML pages
 (originally only JS could be referenced from FXML) and launch Java ReStart applications from the WebFX browser
