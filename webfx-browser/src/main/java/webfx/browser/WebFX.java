@@ -53,6 +53,7 @@ import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -87,6 +88,7 @@ public class WebFX extends Application {
         stage.setTitle("WebFX Browser");
         stage.setScene(scene);
         stage.show();
+        Platform.runLater(()->controller.home());
     }
 
     /**
