@@ -156,7 +156,16 @@ public class WebFXView extends AnchorPane {
         initLocalization();
 
         try {
-            final ClassLoader oldClassloader = Thread.currentThread().getContextClassLoader();
+            ClassLoader oldClassloader = Thread.currentThread().getContextClassLoader();
+
+            if (oldClassloader == null) {
+                //workaround for Java for Mac OS bug:
+                // JavaFX thread can have null context classloader in JavaFX UI thread
+                // if a splash were used when launching the browser.
+                // Set our own classloader for this case.
+                oldClassloader = getClass().getClassLoader();
+                Thread.currentThread().setContextClassLoader(oldClassloader);
+            }
 
             if (cl != null) {
                 Thread.currentThread().setContextClassLoader(cl);
