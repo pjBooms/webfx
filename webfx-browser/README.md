@@ -43,3 +43,20 @@ The security layer must provide a sandbox on each tab, to run JavaFX pages. The 
 FX Protocol (optional)
 =====
 There should be an specific protocol to allow server-side communication. It is already possible though, to use HTTP.
+
+Java ReStart integration
+=====
+It is forked version and it depends on Java ReStart project -- https://github.com/pjBooms/Java-ReStart.
+The integration allows you to reference remote classes from FXML pages
+(originally only JS could be referenced from FXML) and launch Java ReStart applications from the WebFX browser.
+You may play with this with two demos from the home page:
+  1. "WebFX Demo" link -- opens FXML page that reference other FXML pages
+     (all but "Login Demo" reference remote java classes). One of the examples is WebFX browser itself.
+  2. "Java ReStart Demo" link opens FXML page that runs several Java applications located remotely.
+
+This Java ReStart <-> WebFX integration allows you to write applications the same way as web applications but use FXML instead of HTML
+and any programming language that is available on top of Java platform from Java, Scala to JavaScript, JRuby, etc., and without compromising performance or
+to-JS-translated-that-I-do-not-know-how-to-work-and-why-it-does-not-work-when-it-does-not-work issues.
+
+
+

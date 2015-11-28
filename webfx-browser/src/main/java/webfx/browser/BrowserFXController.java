@@ -80,7 +80,8 @@ import webfx.browser.util.FXUtil;
 public class BrowserFXController implements TabManager {
 
     private static final Logger LOGGER = Logger.getLogger(BrowserFXController.class.getName());
-    private static final String HOME_PAGE = "http://learnjavafx.typepad.com/webfx/samples";
+    private static final String HOME_PAGE = "http://javarestart.com";
+//    private static final String HOME_PAGE = "http://localhost:8080";
 
     /**
      * Components
