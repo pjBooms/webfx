@@ -145,7 +145,7 @@ public class DeckMain extends Application {
     }
 
     private void reload() {
-        fxView.load();
+        fxView.load(null);
     }
 
     private void goBack() {

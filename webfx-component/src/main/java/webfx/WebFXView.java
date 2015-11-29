@@ -98,16 +98,16 @@ public class WebFXView extends AnchorPane {
         getStyleClass().add("webfx-view");
     }
 
-    public WebFXView(@NamedArg("url") String url) throws MalformedURLException {
-        this(new URL(url));
-    }
-
-    public WebFXView(URL url) {
-        this();
-        this.urlProperty.set(url);
-        load();
-    }
-
+//    public WebFXView(@NamedArg("url") String url) throws MalformedURLException {
+//        this(new URL(url));
+//    }
+//
+//    public WebFXView(URL url) {
+//        this();
+//        this.urlProperty.set(url);
+//        load();
+//    }
+//
     WebFXView(NavigationContext navigationContext, ClassLoader cl) {
         this();
         this.navigationContext = navigationContext;
@@ -136,18 +136,18 @@ public class WebFXView extends AnchorPane {
         this.locale = locale;
     }
 
-    public void setURL(URL url) {
+    public void setURL(URL url, Object context) {
         this.urlProperty.set(url);
-        load();
+        load(context);
     }
 
     public SimpleObjectProperty<URL> urlProperty() {
         return this.urlProperty;
     }
 
-    public final void load() {
+    public final void load(Object context) {
         if (loaded.get() == false) {
-            Platform.runLater(this::internalLoad);
+            Platform.runLater(() -> this.internalLoad(context));
             loaded.set(true);
         }
     }
@@ -168,7 +168,7 @@ public class WebFXView extends AnchorPane {
         return false;
     }
 
-    private void internalLoad() {
+    private void internalLoad(Object context) {
         pageContext = new PageContext(urlProperty.get());
 
         initLocalization();
@@ -194,6 +194,12 @@ public class WebFXView extends AnchorPane {
 
             fxmlLoader = new FXMLLoader(pageContext.getLocation(), resourceBundle);
             Node loadedNode = fxmlLoader.load();
+            Object controller = fxmlLoader.getController();
+            if ((controller != null) && (controller instanceof WebFXController)) {
+                WebFXController webFXController = (WebFXController) controller;
+                webFXController.setContexts(context, navigationContext);
+                webFXController.onShow();
+            }
 
             if (cl != null) {
                 Thread.currentThread().setContextClassLoader(oldClassloader);

@@ -60,7 +60,7 @@ public class DeckServer implements DeckServerMBean {
 
     @Override
     public void reload() {
-        Platform.runLater(webfx::load);
+        Platform.runLater(()->webfx.load(null));
     }
 
     @Override
