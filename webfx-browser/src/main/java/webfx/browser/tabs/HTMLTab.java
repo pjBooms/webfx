@@ -172,6 +172,11 @@ class HTMLTab extends BrowserTab {
                 throw new RuntimeException("should not be called");
             }
 
+            @Override
+            public void goToWithContext(String url, Object context) {
+                goTo(url);
+            }
+
         };
     }
 
